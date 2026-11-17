@@ -1,10 +1,10 @@
-
 function StatusBadge({ status = 'pending', className = '' }) {
   const normalizedStatus = String(status).toLowerCase()
 
   const statusClasses = {
     active: 'status-active',
     approved: 'status-approved',
+    confirmed: 'status-approved',
     completed: 'status-approved',
     pending: 'status-pending',
     rejected: 'status-rejected',
