@@ -27,11 +27,12 @@ Sample data lives in `db.json`. Start a fake server with `npx json-server db.jso
 - `src/routes/`: page routes and protected routes
 
 ## Using the shared helpers
+List endpoints are paginated, so the list is inside `data.items`.
 ```jsx
 const { data, loading, error, refetch } = useFetch("/campaigns");
 if (loading) return <Loader />;
 if (error) return <ErrorMessage message={error} onRetry={refetch} />;
-if (data.length === 0) return <EmptyState title="No campaigns yet" />;
+if (data.items.length === 0) return <EmptyState title="No campaigns yet" />;
 ```
 
 ## Roles
