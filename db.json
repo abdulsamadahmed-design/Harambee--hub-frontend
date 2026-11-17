@@ -1,0 +1,45 @@
+{
+  "users": [
+    { "id": 1, "name": "Amina Wanjiru", "email": "amina@example.com", "role": "organizer", "email_verified": true },
+    { "id": 2, "name": "Brian Otieno", "email": "brian@example.com", "role": "contributor", "email_verified": true },
+    { "id": 3, "name": "Site Admin", "email": "admin@example.com", "role": "admin", "email_verified": true }
+  ],
+  "campaigns": [
+    {
+      "id": 1,
+      "title": "School fees for Wanjiku",
+      "description": "Help Wanjiku return to school for the new term.",
+      "category": "school_fees",
+      "target_amount": 50000,
+      "raised": 20000,
+      "status": "active",
+      "organizer": "Amina Wanjiru"
+    },
+    {
+      "id": 2,
+      "title": "Wedding fundraiser for Kevin and Mary",
+      "description": "Contributions towards the wedding of Kevin and Mary.",
+      "category": "wedding",
+      "target_amount": 120000,
+      "raised": 85000,
+      "status": "active",
+      "organizer": "Amina Wanjiru"
+    },
+    {
+      "id": 3,
+      "title": "Funeral support for Mzee Otieno",
+      "description": "Support the family during this difficult time.",
+      "category": "funeral",
+      "target_amount": 80000,
+      "raised": 80000,
+      "status": "closed",
+      "organizer": "Amina Wanjiru"
+    }
+  ],
+  "pledges": [
+    { "id": 1, "campaign_id": 1, "user_id": 2, "amount": 5000, "message": "God bless", "anonymous": false, "status": "paid", "contributor": "Brian Otieno" },
+    { "id": 2, "campaign_id": 1, "user_id": 2, "amount": 2000, "message": "", "anonymous": true, "status": "pending", "contributor": "Anonymous" },
+    { "id": 3, "campaign_id": 2, "user_id": 2, "amount": 10000, "message": "Congratulations!", "anonymous": false, "status": "paid", "contributor": "Brian Otieno" },
+    { "id": 4, "campaign_id": 3, "user_id": 2, "amount": 3000, "message": "With you in prayer", "anonymous": false, "status": "paid", "contributor": "Brian Otieno" }
+  ]
+}
