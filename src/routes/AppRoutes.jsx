@@ -1,6 +1,5 @@
-import { Routes, Route } from "react-router-dom";
 
-import ProtectedRoute from "../components/routing/ProtectedRoute";
+import { Routes, Route } from "react-router-dom";
 
 // Public pages
 import Home from "../pages/public/Home";
@@ -39,27 +38,23 @@ export default function AppRoutes() {
       <Route path="/register" element={<Register />} />
 
       {/* ORGANIZER ROUTES */}
-      <Route element={<ProtectedRoute allowedRoles={["organizer"]} />}>
-        <Route path="/organizer" element={<OrganizerDashboard />} />
-        <Route path="/organizer/campaigns" element={<ManageCampaigns />} />
-        <Route path="/organizer/campaigns/new" element={<CreateCampaign />} />
-        <Route path="/organizer/contributions" element={<Contributions />} />
-      </Route>
+      <Route path="/organizer" element={<OrganizerDashboard />} />
+      <Route path="/organizer/campaigns" element={<ManageCampaigns />} />
+      <Route path="/organizer/campaigns/new" element={<CreateCampaign />} />
+      <Route path="/organizer/contributions" element={<Contributions />} />
 
       {/* CONTRIBUTOR ROUTES */}
-      <Route element={<ProtectedRoute allowedRoles={["contributor"]} />}>
-        <Route path="/contributor" element={<ContributorDashboard />} />
-        <Route path="/contributor/contributions" element={<MyContributions />} />
-      </Route>
+      <Route path="/contributor" element={<ContributorDashboard />} />
+      <Route path="/contributor/contributions" element={<MyContributions />} />
 
       {/* ADMIN ROUTES */}
-      <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<ManageUsers />} />
-      </Route>
+      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin/users" element={<ManageUsers />} />
 
       {/* 404 ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
+
+
