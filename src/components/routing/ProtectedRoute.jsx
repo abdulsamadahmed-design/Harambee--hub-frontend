@@ -1,16 +1,17 @@
+
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 
 export default function ProtectedRoute({ allowedRoles = [] }) {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  // Wait until authentication status has been determined
+  // Wait until authentication status is determined
   if (loading) {
     return <p>Loading...</p>;
   }
 
-  // User is not logged in
+  // Redirect unauthenticated users to login
   if (!user) {
     return (
       <Navigate
@@ -21,8 +22,11 @@ export default function ProtectedRoute({ allowedRoles = [] }) {
     );
   }
 
-  // User is logged in, but doesn't have permission
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+  // Check role permissions
+  if (
+    allowedRoles.length > 0 &&
+    !allowedRoles.includes(user.role)
+  ) {
     return <Navigate to="/" replace />;
   }
 
