@@ -1,10 +1,15 @@
-export default function formatCurrency(value) {
-  const amount = Number(value);
-  const safeAmount = Number.isFinite(amount) ? amount : 0;
 
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 2,
-  }).format(safeAmount);
+function formatCurrency(amount) {
+  const number = Number(amount)
+
+  if (!Number.isFinite(number)) {
+    return ''
+  }
+
+  return new Intl.NumberFormat('en-KE', {
+    style: 'currency',
+    currency: 'KES',
+  }).format(number)
 }
+
+export default formatCurrency

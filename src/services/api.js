@@ -1,49 +1,45 @@
-const API_URL = import.meta.env.VITE_API_URL;
+// Address of our Flask backend (set VITE_API_URL in .env when it is deployed)
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-async function request(path) {
-  let url;
+// The login token is kept in the browser's storage after the user logs in
+export function getToken() {
+  return localStorage.getItem("token");
+}
 
-  if (API_URL) {
-    const base = API_URL.replace(/\/$/, "");
-    const endpoint = path.startsWith("/") ? path : `/${path}`;
-    url = `${base}${endpoint}`;
-  } else {
-    url = `/data${path}.json`;
+export function saveToken(token) {
+  localStorage.setItem("token", token);
+}
+
+export function clearToken() {
+  localStorage.removeItem("token");
+}
+
+// One function that sends every request to the backend
+async function request(path, options = {}) {
+  const headers = { "Content-Type": "application/json" };
+
+  // If the user is logged in, send the token so the backend knows who they are
+  const token = getToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(url);
+  const response = await fetch(`${API_URL}${path}`, { ...options, headers });
+  const data = await response.json().catch(() => ({}));
 
+  // The backend sends errors as { "error": "message" }
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(data.error || "Something went wrong");
   }
-
-  return response.json();
+  return data;
 }
 
-export async function getCampaigns() {
-  return request("/campaigns");
-}
+// Short helpers, for example: api.get("/campaigns") or api.post("/auth/login", { email, password })
+const api = {
+  get: (path) => request(path),
+  post: (path, body) => request(path, { method: "POST", body: JSON.stringify(body) }),
+  patch: (path, body) => request(path, { method: "PATCH", body: JSON.stringify(body) }),
+  delete: (path) => request(path, { method: "DELETE" }),
+};
 
-export async function getCampaignById(id) {
-  const campaigns = await getCampaigns();
-  const items = Array.isArray(campaigns)
-    ? campaigns
-    : campaigns.items ?? campaigns.campaigns ?? campaigns.data ?? [];
-
-  return items.find((campaign) => String(campaign.id) === String(id)) ?? null;
-}
-
-async function get(path) {
-  if (path === "/campaigns") {
-    return getCampaigns();
-  }
-
-  if (path.startsWith("/campaigns/")) {
-    const id = path.split("/").filter(Boolean).at(-1);
-    return getCampaignById(id);
-  }
-
-  throw new Error(`Unknown API path: ${path}`);
-}
-
-export default { get };
+export default api;

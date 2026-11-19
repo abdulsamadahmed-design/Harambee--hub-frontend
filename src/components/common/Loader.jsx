@@ -1,8 +1,11 @@
+import "./common.css";
+
+// Shown while data is loading
 export default function Loader({ text = "Loading..." }) {
   return (
-    <div className="loader" role="status" aria-live="polite">
-      <span className="loader-spinner" aria-hidden="true" />
-      <span>{text}</span>
+    <div className="loader" role="status">
+      <div className="loader-spinner"></div>
+      <p>{text}</p>
     </div>
   );
 }
