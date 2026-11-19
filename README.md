@@ -15,7 +15,7 @@ Harambee Hub is a fundraising platform for weddings, funerals, school fees and c
 4. Open the address shown in the terminal (usually http://localhost:5173)
 
 ## Working without the backend
-Sample data lives in `db.json`. Start a fake server with `npx json-server db.json --port 3001` and set `VITE_API_URL=http://localhost:3001` in `.env`.
+Sample data lives in `db.json`. Start the mock server with `node scripts/mock-server.js` (it answers on port 3001 in the same paginated format as the Flask backend) and set `VITE_API_URL=http://localhost:3001/api` in `.env`.
 
 ## Project structure
 - `src/services/api.js`: sends every request to the backend and adds the login token
