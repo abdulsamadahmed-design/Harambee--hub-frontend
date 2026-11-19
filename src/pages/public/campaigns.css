@@ -1,0 +1,411 @@
+/* ============ M3 shared styles ============ */
+/* All classes are prefixed m3- to avoid collisions with M2's global.css. */
+
+/* ---- Grid + cards ---- */
+.m3-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.m3-card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.m3-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.m3-card-image-link { display: block; }
+
+.m3-card-image-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, var(--color-primary-light), #d6e9df);
+  overflow: hidden;
+}
+
+.m3-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.m3-card-image-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary-dark);
+  font-size: 56px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--color-primary-light), #cfe7db);
+}
+
+.m3-card-status {
+  position: absolute;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+}
+
+.m3-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+}
+
+.m3-card-title { margin: 0; font-size: 18px; line-height: 1.3; }
+.m3-card-title a { color: var(--color-text); }
+.m3-card-title a:hover { color: var(--color-primary); }
+
+.m3-card-organizer,
+.m3-card-deadline {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.m3-card-description {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.m3-card-actions {
+  margin-top: auto;
+  padding-top: var(--spacing-sm);
+}
+
+.m3-card-cta { width: 100%; }
+
+/* ---- Progress ---- */
+.m3-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.m3-progress-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.m3-progress-raised {
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  font-size: 15px;
+}
+
+.m3-progress-goal {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.m3-progress-track {
+  width: 100%;
+  height: 8px;
+  background-color: var(--color-background);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.m3-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
+  border-radius: var(--radius-full);
+  transition: width 0.4s ease;
+}
+
+.m3-progress-foot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.m3-progress-percent {
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+
+.m3-progress-days-ended {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.m3-progress-large .m3-progress-raised { font-size: 22px; }
+.m3-progress-large .m3-progress-goal { font-size: 15px; }
+.m3-progress-large .m3-progress-track { height: 12px; }
+.m3-progress-large .m3-progress-foot { font-size: 14px; }
+
+/* ---- Campaigns page ---- */
+.m3-page {
+  padding: var(--spacing-xl) 0 var(--spacing-2xl);
+}
+
+.m3-page-header { margin-bottom: var(--spacing-xl); }
+
+.m3-page-title {
+  margin: 0 0 var(--spacing-xs);
+  font-size: 30px;
+}
+
+.m3-page-subtitle {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.m3-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  align-items: flex-end;
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.m3-toolbar .form-group {
+  margin-bottom: 0;
+  flex: 1 1 220px;
+}
+
+.m3-toolbar select {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.m3-result-count {
+  margin: 0 0 var(--spacing-md);
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+/* ---- Home page ---- */
+.m3-hero {
+  position: relative;
+  padding: var(--spacing-2xl) 0;
+  color: white;
+  background:
+    linear-gradient(135deg, rgba(16, 102, 56, 0.92), rgba(22, 131, 74, 0.85)),
+    url("/images/hero.svg") center / cover no-repeat,
+    linear-gradient(135deg, #16834a, #0f5c36);
+  overflow: hidden;
+}
+
+.m3-hero-inner { max-width: 720px; }
+
+.m3-hero-title {
+  margin: 0 0 var(--spacing-md);
+  font-size: 40px;
+  line-height: 1.15;
+}
+
+.m3-hero-text {
+  margin: 0 0 var(--spacing-lg);
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.m3-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.m3-section { padding: var(--spacing-2xl) 0; }
+
+.m3-section-alt {
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.m3-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.m3-section-title { margin: 0; font-size: 26px; }
+.m3-section-link { color: var(--color-primary); font-weight: 600; }
+
+.m3-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.m3-step {
+  padding: var(--spacing-lg);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.m3-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-bottom: var(--spacing-sm);
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
+.m3-step h3 {
+  margin: 0 0 var(--spacing-xs);
+  font-size: 17px;
+}
+
+.m3-step p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.m3-cta {
+  padding: var(--spacing-2xl) 0;
+  text-align: center;
+  background-color: var(--color-primary-light);
+}
+
+.m3-cta h2 {
+  margin: 0 0 var(--spacing-sm);
+  font-size: 26px;
+}
+
+.m3-cta p {
+  margin: 0 0 var(--spacing-lg);
+  color: var(--color-text-muted);
+}
+
+/* ---- Details page ---- */
+.m3-detail {
+  padding: var(--spacing-xl) 0 var(--spacing-2xl);
+}
+
+.m3-detail-back {
+  display: inline-block;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.m3-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--spacing-xl);
+  align-items: start;
+}
+
+.m3-detail-image-wrap {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-primary-light), #cfe7db);
+  margin-bottom: var(--spacing-lg);
+}
+
+.m3-detail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.m3-detail-image-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary-dark);
+  font-size: 96px;
+  font-weight: 700;
+}
+
+.m3-detail-title {
+  margin: 0 0 var(--spacing-sm);
+  font-size: 30px;
+}
+
+.m3-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.m3-detail-description {
+  white-space: pre-line;
+  line-height: 1.7;
+  color: var(--color-text);
+}
+
+.m3-detail-side {
+  position: sticky;
+  top: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.m3-detail-side h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.m3-pledge-slot {
+  padding: var(--spacing-md);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .m3-detail-grid { grid-template-columns: 1fr; }
+  .m3-detail-side { position: static; }
+  .m3-hero-title { font-size: 30px; }
+}
+
+@media (max-width: 600px) {
+  .m3-grid { grid-template-columns: 1fr; }
+  .m3-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
