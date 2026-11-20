@@ -1,4 +1,3 @@
-
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
 
@@ -6,12 +5,16 @@ export default function ProtectedRoute({ allowedRoles = [] }) {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  // Wait until authentication status is determined
+  // Wait for authentication verification
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div role="status" aria-live="polite">
+        Checking your session...
+      </div>
+    );
   }
 
-  // Redirect unauthenticated users to login
+  // Redirect users who are not logged in
   if (!user) {
     return (
       <Navigate
@@ -22,7 +25,7 @@ export default function ProtectedRoute({ allowedRoles = [] }) {
     );
   }
 
-  // Check role permissions
+  // Verify the user's role
   if (
     allowedRoles.length > 0 &&
     !allowedRoles.includes(user.role)
