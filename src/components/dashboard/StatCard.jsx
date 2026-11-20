@@ -1,15 +1,44 @@
-export default function StatCard({
+
+function StatCard({
   title,
   value,
+  icon,
   description,
+  trend,
 }) {
   return (
-    <article className="stat-card">
-      <h3>{title}</h3>
-      <p className="stat-card-value">{value ?? '—'}</p>
-      {description && (
-        <p className="stat-card-description">{description}</p>
+    <div className="stat-card">
+      <div className="stat-card-header">
+        <span className="stat-card-title">{title}</span>
+
+        {icon && (
+          <div className="stat-card-icon">
+            {icon}
+          </div>
+        )}
+      </div>
+
+      <div className="stat-card-value">
+        {value ?? '—'}
+      </div>
+
+      {(description || trend) && (
+        <div className="stat-card-footer">
+          {description && (
+            <span className="stat-card-description">
+              {description}
+            </span>
+          )}
+
+          {trend && (
+            <span className="stat-card-trend">
+              {trend}
+            </span>
+          )}
+        </div>
       )}
-    </article>
+    </div>
   )
 }
+
+export default StatCard
