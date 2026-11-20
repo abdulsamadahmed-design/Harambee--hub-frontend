@@ -1,14 +1,20 @@
+import { useState } from 'react'
 import DashboardLayout from '../../components/layout/DashboardLayout'
 import Loader from '../../components/common/Loader'
 import ErrorMessage from '../../components/common/ErrorMessage'
 import StatusBadge from '../../components/common/StatusBadge'
+import Button from '../../components/common/Button'
 import useFetch from '../../hooks/useFetch'
-import formatDate from '../../utils/formatDate'
 
 export default function ManageUsers() {
-  const { data, loading, error, refetch } = useFetch('/admin/users')
+  const [page, setPage] = useState(1)
+
+  const { data, loading, error, refetch } = useFetch(
+    `/admin/users?page=${page}&per_page=10`
+  )
 
   const users = data?.items || []
+  const totalPages = data?.pages || 1
 
   return (
     <DashboardLayout
@@ -29,7 +35,8 @@ export default function ManageUsers() {
         ) : (
           <>
             <p className="users-count">
-              Total registered users: <strong>{data?.total ?? users.length}</strong>
+              Total registered users:{' '}
+              <strong>{data?.total ?? users.length}</strong>
             </p>
 
             {users.length === 0 ? (
@@ -43,20 +50,24 @@ export default function ManageUsers() {
                     <tr>
                       <th>Name</th>
                       <th>Email</th>
+                      <th>Phone</th>
                       <th>Role</th>
-                      <th>Registered</th>
+                      <th>Email Verification</th>
                     </tr>
                   </thead>
 
                   <tbody>
                     {users.map((user) => (
                       <tr key={user.id}>
-                        <td>{user.name || user.full_name || 'Name unavailable'}</td>
+                        <td>{user.name || 'Name unavailable'}</td>
                         <td>{user.email}</td>
+                        <td>{user.phone || '—'}</td>
                         <td>
                           <StatusBadge status={user.role} />
                         </td>
-                        <td>{formatDate(user.created_at) || '—'}</td>
+                        <td>
+                          {user.email_verified ? 'Verified' : 'Not verified'}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -64,10 +75,28 @@ export default function ManageUsers() {
               </div>
             )}
 
-            {data?.pages > 1 && (
-              <p className="pagination-info">
-                Page {data.page} of {data.pages}
-              </p>
+            {totalPages > 1 && (
+              <div className="pagination-controls">
+                <Button
+                  variant="secondary"
+                  disabled={page <= 1}
+                  onClick={() => setPage((currentPage) => currentPage - 1)}
+                >
+                  Previous
+                </Button>
+
+                <span>
+                  Page {data?.page || page} of {totalPages}
+                </span>
+
+                <Button
+                  variant="secondary"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((currentPage) => currentPage + 1)}
+                >
+                  Next
+                </Button>
+              </div>
             )}
           </>
         )}
