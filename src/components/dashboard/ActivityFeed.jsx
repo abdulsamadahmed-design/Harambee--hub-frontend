@@ -1,11 +1,15 @@
 
+import formatCurrency from '../../utils/formatCurrency'
 import formatDate from '../../utils/formatDate'
 
-function ActivityFeed({ activities = [] }) {
+function ActivityFeed({
+  activities = [],
+  title = 'Recent Activity',
+}) {
   if (activities.length === 0) {
     return (
       <div className="activity-feed">
-        <h2 className="activity-feed-title">Recent Activity</h2>
+        <h2 className="activity-feed-title">{title}</h2>
         <p className="activity-feed-empty">
           No recent activity to display.
         </p>
@@ -15,7 +19,7 @@ function ActivityFeed({ activities = [] }) {
 
   return (
     <div className="activity-feed">
-      <h2 className="activity-feed-title">Recent Activity</h2>
+      <h2 className="activity-feed-title">{title}</h2>
 
       <div className="activity-feed-list">
         {activities.map((activity, index) => (
@@ -26,15 +30,33 @@ function ActivityFeed({ activities = [] }) {
             <div className="activity-feed-indicator" />
 
             <div className="activity-feed-content">
+              <strong>
+                {activity.contributor?.name ||
+                  activity.contributor_name ||
+                  activity.user?.name ||
+                  activity.title ||
+                  'Activity'}
+              </strong>
+
               <p className="activity-feed-message">
-                {activity.message}
+                {activity.message ||
+                  activity.description ||
+                  'Contribution activity'}
               </p>
 
-              {activity.date && (
-                <span className="activity-feed-date">
-                  {formatDate(activity.date)}
-                </span>
-              )}
+              <div className="activity-meta">
+                {activity.amount != null && (
+                  <strong>
+                    {formatCurrency(activity.amount)}
+                  </strong>
+                )}
+
+                {(activity.created_at || activity.date) && (
+                  <span className="activity-feed-date">
+                    {formatDate(activity.created_at || activity.date)}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         ))}

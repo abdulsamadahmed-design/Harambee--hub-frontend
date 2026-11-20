@@ -1,5 +1,11 @@
 
-function StatCard({ title, value, icon, description, trend }) {
+function StatCard({
+  title,
+  value,
+  icon,
+  description,
+  trend,
+}) {
   return (
     <div className="stat-card">
       <div className="stat-card-header">
@@ -13,7 +19,7 @@ function StatCard({ title, value, icon, description, trend }) {
       </div>
 
       <div className="stat-card-value">
-        {value ?? 0}
+        {value ?? '—'}
       </div>
 
       {(description || trend) && (
