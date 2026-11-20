@@ -40,51 +40,19 @@ export default function AppRoutes() {
 
       {/* Organizer routes */}
       <Route element={<ProtectedRoute allowedRoles={["organizer"]} />}>
-        <Route
-          path="/organizer"
-          element={<OrganizerDashboard />}
-        />
+        <Route path="/organizer" element={<OrganizerDashboard />} />
+        <Route path="/organizer/campaigns" element={<ManageCampaigns />} />
+        <Route path="/organizer/campaigns/new" element={<CreateCampaign />} />
+        <Route path="/organizer/contributions" element={<Contributions />} />
 
-        <Route
-          path="/organizer/campaigns"
-          element={<ManageCampaigns />}
-        />
-
-        <Route
-          path="/organizer/campaigns/new"
-          element={<CreateCampaign />}
-        />
-
-        <Route
-          path="/organizer/contributions"
-          element={<Contributions />}
-        />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/users" element={<ManageUsers />} />
       </Route>
 
       {/* Contributor routes */}
       <Route element={<ProtectedRoute allowedRoles={["contributor"]} />}>
-        <Route
-          path="/contributor"
-          element={<ContributorDashboard />}
-        />
-
-        <Route
-          path="/contributor/contributions"
-          element={<MyContributions />}
-        />
-      </Route>
-
-      {/* Admin routes */}
-      <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-        <Route
-          path="/admin"
-          element={<AdminDashboard />}
-        />
-
-        <Route
-          path="/admin/users"
-          element={<ManageUsers />}
-        />
+        <Route path="/contributor" element={<ContributorDashboard />} />
+        <Route path="/contributor/contributions" element={<MyContributions />} />
       </Route>
 
       {/* 404 */}
