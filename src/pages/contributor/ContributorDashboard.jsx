@@ -13,10 +13,22 @@ export default function ContributorDashboard() {
   const [error, setError] = useState('')
 
   const fetchPledges = useCallback(async () => {
+    setLoading(true)
+    setError('')
+
     try {
-      const response = await api.get('/pledges/mine')
-      setError('')
-      setPledges(response.items || response.pledges || [])
+      const firstPage = await api.get('/pledges/mine?page=1&per_page=100')
+      const allPledges = firstPage.items || []
+      const totalPages = firstPage.pages || 1
+
+      for (let page = 2; page <= totalPages; page += 1) {
+        const response = await api.get(
+          `/pledges/mine?page=${page}&per_page=100`
+        )
+        allPledges.push(...(response.items || []))
+      }
+
+      setPledges(allPledges)
     } catch (err) {
       setError(err.message || 'Could not load your contributions.')
     } finally {
@@ -25,34 +37,21 @@ export default function ContributorDashboard() {
   }, [])
 
   useEffect(() => {
-    let cancelled = false
-
-    api.get('/pledges/mine')
-      .then((response) => {
-        if (cancelled) return
-        setPledges(response.items || response.pledges || [])
-      })
-      .catch((err) => {
-        if (cancelled) return
-        setError(err.message || 'Could not load your contributions.')
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
+    Promise.resolve().then(fetchPledges)
+  }, [fetchPledges])
 
   const totalPledged = pledges.reduce(
     (total, pledge) => total + Number(pledge.amount || 0),
-    0,
+    0
   )
 
   const totalConfirmed = pledges
     .filter((pledge) => pledge.status === 'confirmed')
     .reduce((total, pledge) => total + Number(pledge.amount || 0), 0)
+
+  const pendingCount = pledges.filter(
+    (pledge) => pledge.status === 'pending'
+  ).length
 
   return (
     <DashboardLayout
@@ -73,12 +72,21 @@ export default function ContributorDashboard() {
         ) : (
           <>
             <div className="stats-grid">
-              <StatCard title="Total Contributions" value={pledges.length} />
-              <StatCard title="Total Pledged" value={formatCurrency(totalPledged)} />
-              <StatCard title="Confirmed Amount" value={formatCurrency(totalConfirmed)} />
+              <StatCard
+                title="Total Contributions"
+                value={pledges.length}
+              />
+              <StatCard
+                title="Total Pledged"
+                value={formatCurrency(totalPledged)}
+              />
+              <StatCard
+                title="Confirmed Amount"
+                value={formatCurrency(totalConfirmed)}
+              />
               <StatCard
                 title="Pending Contributions"
-                value={pledges.filter((pledge) => pledge.status === 'pending').length}
+                value={pendingCount}
               />
             </div>
 

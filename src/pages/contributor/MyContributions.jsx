@@ -3,45 +3,37 @@ import DashboardLayout from '../../components/layout/DashboardLayout'
 import PledgeTable from '../../components/pledges/PledgeTable'
 import Loader from '../../components/common/Loader'
 import ErrorMessage from '../../components/common/ErrorMessage'
+import Button from '../../components/common/Button'
 import api from '../../services/api'
 
 export default function MyContributions() {
   const [pledges, setPledges] = useState([])
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   const fetchPledges = useCallback(async () => {
+    setLoading(true)
+    setError('')
+
     try {
-      const response = await api.get('/pledges/mine')
-      setError('')
+      const response = await api.get(
+        `/pledges/mine?page=${page}&per_page=10`
+      )
+
       setPledges(response.items || response.pledges || [])
+      setTotalPages(response.pages || 1)
     } catch (err) {
       setError(err.message || 'Could not load your contributions.')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [page])
 
   useEffect(() => {
-    let cancelled = false
-
-    api.get('/pledges/mine')
-      .then((response) => {
-        if (cancelled) return
-        setPledges(response.items || response.pledges || [])
-      })
-      .catch((err) => {
-        if (cancelled) return
-        setError(err.message || 'Could not load your contributions.')
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
+    Promise.resolve().then(fetchPledges)
+  }, [fetchPledges])
 
   return (
     <DashboardLayout
@@ -60,7 +52,33 @@ export default function MyContributions() {
         {loading ? (
           <Loader text="Loading contributions..." />
         ) : (
-          <PledgeTable pledges={pledges} />
+          <>
+            <PledgeTable pledges={pledges} />
+
+            {totalPages > 1 && (
+              <div className="pagination-controls">
+                <Button
+                  variant="secondary"
+                  disabled={page <= 1}
+                  onClick={() => setPage((currentPage) => currentPage - 1)}
+                >
+                  Previous
+                </Button>
+
+                <span>
+                  Page {page} of {totalPages}
+                </span>
+
+                <Button
+                  variant="secondary"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((currentPage) => currentPage + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </DashboardLayout>
