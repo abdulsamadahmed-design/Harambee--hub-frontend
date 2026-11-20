@@ -1,26 +1,26 @@
 import formatCurrency from "../../utils/formatCurrency";
-import {
-  getGoal,
-  getRaised,
-  daysLeft,
-  getEndDate,
-  progressPercent,
-} from "./campaignHelpers";
+import { getGoal, getRaised, daysLeft, getEndDate } from "./campaignHelpers";
 
 // Shows raised / goal with a bar and a "days left" pill.
 // size: "small" (used inside cards) or "large" (used on details page)
-export default function CampaignProgress({ campaign, size = "small" }) {
+export default function CampaignProgress({
+  campaign,
+  raisedAmount,
+  size = "small",
+}) {
   const goal = getGoal(campaign);
-  const raised = getRaised(campaign);
-  const percent = progressPercent(campaign);
+  const raised =
+    raisedAmount !== undefined ? Number(raisedAmount) : getRaised(campaign);
+  const percent =
+    goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
   const remaining = daysLeft(getEndDate(campaign));
 
   const daysLabel =
     remaining == null
       ? "No deadline"
       : remaining > 0
-      ? `${remaining} day${remaining === 1 ? "" : "s"} left`
-      : "Ended";
+        ? `${remaining} day${remaining === 1 ? "" : "s"} left`
+        : "Ended";
 
   return (
     <div className={`m3-progress m3-progress-${size}`}>
@@ -45,7 +45,9 @@ export default function CampaignProgress({ campaign, size = "small" }) {
         <span
           className={
             "m3-progress-days" +
-            (remaining != null && remaining <= 0 ? " m3-progress-days-ended" : "")
+            (remaining != null && remaining <= 0
+              ? " m3-progress-days-ended"
+              : "")
           }
         >
           {daysLabel}

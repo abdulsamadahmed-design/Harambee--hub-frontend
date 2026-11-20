@@ -7,12 +7,14 @@ import {
   getStatus,
   getEndDate,
   getOrganizerName,
+  getRaised,
 } from "./campaignHelpers";
 
 export default function CampaignCard({ campaign }) {
   const status = getStatus(campaign);
   const image = getImageUrl(campaign);
   const endDate = getEndDate(campaign);
+  const raisedAmount = getRaised(campaign);
 
   return (
     <article className="m3-card">
@@ -53,7 +55,11 @@ export default function CampaignCard({ campaign }) {
             : campaign.description}
         </p>
 
-        <CampaignProgress campaign={campaign} size="small" />
+        <CampaignProgress
+          campaign={campaign}
+          raisedAmount={raisedAmount}
+          size="small"
+        />
 
         {endDate && (
           <p className="m3-card-deadline">Ends {formatDate(endDate)}</p>

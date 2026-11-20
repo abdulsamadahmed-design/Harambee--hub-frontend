@@ -10,6 +10,7 @@ import {
   getStatus,
   getEndDate,
   getOrganizerName,
+  getRaised,
 } from "../../components/campaigns/campaignHelpers";
 import "./campaigns.css";
 
@@ -53,6 +54,7 @@ export default function CampaignDetails() {
   const image = getImageUrl(campaign);
   const status = getStatus(campaign);
   const endDate = getEndDate(campaign);
+  const raisedAmount = getRaised(campaign);
 
   return (
     <div className="m3-detail">
@@ -90,14 +92,16 @@ export default function CampaignDetails() {
               {endDate && <span>Ends {formatDate(endDate)}</span>}
             </div>
 
-            <div className="m3-detail-description">
-              {campaign.description}
-            </div>
+            <div className="m3-detail-description">{campaign.description}</div>
           </div>
 
           <aside className="m3-detail-side">
             <h3>Campaign progress</h3>
-            <CampaignProgress campaign={campaign} size="large" />
+            <CampaignProgress
+              campaign={campaign}
+              raisedAmount={raisedAmount}
+              size="large"
+            />
 
             <div id="pledge-slot" data-campaign-id={campaign.id}>
               <div className="m3-pledge-slot">
