@@ -1,45 +1,101 @@
-// Address of our Flask backend (set VITE_API_URL in .env when it is deployed)
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+// Address of our Flask backend (set VITE_API_URL in .env when deployed)
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api"
+).replace(/\/+$/, "");
 
-// The login token is kept in the browser's storage after the user logs in
+// Keep the token key compatible with the existing login flow.
+const TOKEN_KEY = "token";
+
 export function getToken() {
-  return localStorage.getItem("token");
+  return localStorage.getItem(TOKEN_KEY);
 }
 
 export function saveToken(token) {
-  localStorage.setItem("token", token);
+  if (!token) {
+    throw new Error("Authentication token is missing");
+  }
+  localStorage.setItem(TOKEN_KEY, token);
 }
 
 export function clearToken() {
-  localStorage.removeItem("token");
+  localStorage.removeItem(TOKEN_KEY);
 }
 
-// One function that sends every request to the backend
-async function request(path, options = {}) {
-  const headers = { "Content-Type": "application/json" };
+// Reusable API request function
+async function request(method, path, data) {
+  const headers = {
+    Accept: "application/json",
+  };
 
-  // If the user is logged in, send the token so the backend knows who they are
   const token = getToken();
+
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_URL}${path}`, { ...options, headers });
-  const data = await response.json().catch(() => ({}));
-
-  // The backend sends errors as { "error": "message" }
-  if (!response.ok) {
-    throw new Error(data.error || "Something went wrong");
+  if (data !== undefined) {
+    headers["Content-Type"] = "application/json";
   }
-  return data;
+
+  let response;
+
+  try {
+    response = await fetch(
+      `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`,
+      {
+        method,
+        headers,
+        body: data !== undefined ? JSON.stringify(data) : undefined,
+      }
+    );
+  } catch {
+    throw new Error(
+      "Unable to connect to the server. Please check your backend."
+    );
+  }
+
+  const responseText = await response.text();
+  let result = null;
+
+  if (responseText) {
+    try {
+      result = JSON.parse(responseText);
+    } catch {
+      result = responseText;
+    }
+  }
+
+  if (!response.ok) {
+    const message =
+      result?.message ||
+      result?.detail ||
+      result?.error ||
+      `Request failed with status ${response.status}`;
+
+    throw new Error(
+      typeof message === "string" ? message : JSON.stringify(message)
+    );
+  }
+
+  return result;
 }
 
-// Short helpers, for example: api.get("/campaigns") or api.post("/auth/login", { email, password })
 const api = {
-  get: (path) => request(path),
-  post: (path, body) => request(path, { method: "POST", body: JSON.stringify(body) }),
-  patch: (path, body) => request(path, { method: "PATCH", body: JSON.stringify(body) }),
-  delete: (path) => request(path, { method: "DELETE" }),
+  get(path) {
+    return request("GET", path);
+  },
+  post(path, data) {
+    return request("POST", path, data);
+  },
+  put(path, data) {
+    return request("PUT", path, data);
+  },
+  patch(path, data) {
+    return request("PATCH", path, data);
+  },
+  delete(path) {
+    return request("DELETE", path);
+  },
 };
 
 export default api;
