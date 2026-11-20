@@ -1,5 +1,6 @@
-
 import { Routes, Route } from "react-router-dom";
+
+import ProtectedRoute from "../components/routing/ProtectedRoute";
 
 // Public pages
 import Home from "../pages/public/Home";
@@ -28,33 +29,66 @@ import ManageUsers from "../pages/admin/ManageUsers";
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* PUBLIC ROUTES */}
+      {/* Public routes */}
       <Route path="/" element={<Home />} />
       <Route path="/campaigns" element={<Campaigns />} />
       <Route path="/campaigns/:id" element={<CampaignDetails />} />
 
-      {/* AUTH ROUTES */}
+      {/* Authentication */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* ORGANIZER ROUTES */}
-      <Route path="/organizer" element={<OrganizerDashboard />} />
-      <Route path="/organizer/campaigns" element={<ManageCampaigns />} />
-      <Route path="/organizer/campaigns/new" element={<CreateCampaign />} />
-      <Route path="/organizer/contributions" element={<Contributions />} />
+      {/* Organizer routes */}
+      <Route element={<ProtectedRoute allowedRoles={["organizer"]} />}>
+        <Route
+          path="/organizer"
+          element={<OrganizerDashboard />}
+        />
 
-      {/* CONTRIBUTOR ROUTES */}
-      <Route path="/contributor" element={<ContributorDashboard />} />
-      <Route path="/contributor/contributions" element={<MyContributions />} />
+        <Route
+          path="/organizer/campaigns"
+          element={<ManageCampaigns />}
+        />
 
-      {/* ADMIN ROUTES */}
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/admin/users" element={<ManageUsers />} />
+        <Route
+          path="/organizer/campaigns/new"
+          element={<CreateCampaign />}
+        />
 
-      {/* 404 ROUTE */}
+        <Route
+          path="/organizer/contributions"
+          element={<Contributions />}
+        />
+      </Route>
+
+      {/* Contributor routes */}
+      <Route element={<ProtectedRoute allowedRoles={["contributor"]} />}>
+        <Route
+          path="/contributor"
+          element={<ContributorDashboard />}
+        />
+
+        <Route
+          path="/contributor/contributions"
+          element={<MyContributions />}
+        />
+      </Route>
+
+      {/* Admin routes */}
+      <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+        <Route
+          path="/admin"
+          element={<AdminDashboard />}
+        />
+
+        <Route
+          path="/admin/users"
+          element={<ManageUsers />}
+        />
+      </Route>
+
+      {/* 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
-
-
