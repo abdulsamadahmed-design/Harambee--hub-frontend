@@ -1,31 +1,58 @@
+import formatCurrency from "../../utils/formatCurrency";
+import { getGoal, getRaised, daysLeft, getEndDate } from "./campaignHelpers";
 
-function CampaignProgress({ raised = 0, goal = 0 }) {
-  const percentage =
-    Number(goal) > 0
-      ? Math.min((Number(raised) / Number(goal)) * 100, 100)
-      : 0
+// Shows raised / goal with a bar and a "days left" pill.
+// size: "small" (used inside cards) or "large" (used on details page)
+export default function CampaignProgress({
+  campaign,
+  raisedAmount,
+  size = "small",
+}) {
+  const goal = getGoal(campaign);
+  const raised =
+    raisedAmount !== undefined ? Number(raisedAmount) : getRaised(campaign);
+  const percent =
+    goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
+  const remaining = daysLeft(getEndDate(campaign));
+
+  const daysLabel =
+    remaining == null
+      ? "No deadline"
+      : remaining > 0
+        ? `${remaining} day${remaining === 1 ? "" : "s"} left`
+        : "Ended";
 
   return (
-    <div className="campaign-progress">
-      <div className="campaign-progress-info">
-        <span>Fundraising Progress</span>
-        <strong>{percentage.toFixed(1)}%</strong>
+    <div className={`m3-progress m3-progress-${size}`}>
+      <div className="m3-progress-head">
+        <span className="m3-progress-raised">{formatCurrency(raised)}</span>
+        <span className="m3-progress-goal">of {formatCurrency(goal)}</span>
       </div>
 
       <div
-        className="campaign-progress-track"
+        className="m3-progress-track"
         role="progressbar"
-        aria-valuenow={percentage}
-        aria-valuemin="0"
-        aria-valuemax="100"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={percent}
+        aria-label="Campaign progress"
       >
-        <div
-          className="campaign-progress-fill"
-          style={{ width: `${percentage}%` }}
-        />
+        <div className="m3-progress-fill" style={{ width: `${percent}%` }} />
+      </div>
+
+      <div className="m3-progress-foot">
+        <span className="m3-progress-percent">{percent}% funded</span>
+        <span
+          className={
+            "m3-progress-days" +
+            (remaining != null && remaining <= 0
+              ? " m3-progress-days-ended"
+              : "")
+          }
+        >
+          {daysLabel}
+        </span>
       </div>
     </div>
-  )
+  );
 }
-
-export default CampaignProgress

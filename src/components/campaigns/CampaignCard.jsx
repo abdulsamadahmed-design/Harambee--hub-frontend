@@ -1,52 +1,79 @@
+import { Link } from "react-router-dom";
+import StatusBadge from "../common/StatusBadge";
+import CampaignProgress from "./CampaignProgress";
+import formatDate from "../../utils/formatDate";
+import {
+  getImageUrl,
+  getStatus,
+  getEndDate,
+  getOrganizerName,
+  getRaised,
+} from "./campaignHelpers";
 
-import formatCurrency from '../../utils/formatCurrency'
-import formatDate from '../../utils/formatDate'
-import StatusBadge from '../common/StatusBadge'
-import CampaignProgress from './CampaignProgress'
-
-function CampaignCard({ campaign }) {
-  const {
-    title,
-    description,
-    goal_amount,
-    current_amount = 0,
-    status = 'active',
-    end_date,
-  } = campaign
+export default function CampaignCard({ campaign }) {
+  const status = getStatus(campaign);
+  const image = getImageUrl(campaign);
+  const endDate = getEndDate(campaign);
+  const raisedAmount = getRaised(campaign);
 
   return (
-    <div className="campaign-card">
-      <div className="campaign-card-header">
-        <h3>{title}</h3>
-        <StatusBadge status={status} />
-      </div>
+    <article className="m3-card">
+      <Link to={`/campaigns/${campaign.id}`} className="m3-card-image-link">
+        <div className="m3-card-image-wrap">
+          {image ? (
+            <img
+              src={image}
+              alt={campaign.title}
+              className="m3-card-image"
+              loading="lazy"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = "/images/campaign-placeholder.svg";
+              }}
+            />
+          ) : (
+            <div className="m3-card-image-fallback" aria-hidden="true">
+              {campaign.title?.charAt(0) ?? "?"}
+            </div>
+          )}
+          <span className="m3-card-status">
+            <StatusBadge status={status} />
+          </span>
+        </div>
+      </Link>
 
-      <p className="campaign-card-description">
-        {description}
-      </p>
+      <div className="m3-card-body">
+        <h3 className="m3-card-title">
+          <Link to={`/campaigns/${campaign.id}`}>{campaign.title}</Link>
+        </h3>
 
-      <div className="campaign-card-details">
-        <p>
-          <strong>Goal:</strong> {formatCurrency(goal_amount)}
+        <p className="m3-card-organizer">by {getOrganizerName(campaign)}</p>
+
+        <p className="m3-card-description">
+          {campaign.description?.length > 120
+            ? `${campaign.description.slice(0, 120)}…`
+            : campaign.description}
         </p>
 
-        <p>
-          <strong>Raised:</strong> {formatCurrency(current_amount)}
-        </p>
+        <CampaignProgress
+          campaign={campaign}
+          raisedAmount={raisedAmount}
+          size="small"
+        />
 
-        {end_date && (
-          <p>
-            <strong>Ends:</strong> {formatDate(end_date)}
-          </p>
+        {endDate && (
+          <p className="m3-card-deadline">Ends {formatDate(endDate)}</p>
         )}
+
+        <div className="m3-card-actions">
+          <Link
+            to={`/campaigns/${campaign.id}`}
+            className="btn btn-primary btn-medium m3-card-cta"
+          >
+            View campaign
+          </Link>
+        </div>
       </div>
-
-      <CampaignProgress
-        raised={current_amount}
-        goal={goal_amount}
-      />
-    </div>
-  )
+    </article>
+  );
 }
-
-export default CampaignCard
