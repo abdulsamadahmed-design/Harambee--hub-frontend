@@ -1,40 +1,62 @@
+import { useState, useEffect, useMemo, useCallback } from "react";
+import api from "../services/api";
 
-import { useState, useEffect, useCallback } from 'react'
-import api from '../services/api'
-
-// Loads data from the backend.
 export default function useFetch(path) {
-  const [data, setData] = useState(null)
-  const [loading, setLoading] = useState(Boolean(path))
-  const [error, setError] = useState(null)
+  const [reloadCount, setReloadCount] = useState(0);
 
-  const fetchData = useCallback(async () => {
-    if (!path) return
+  const [result, setResult] = useState({
+    request: null,
+    data: null,
+    error: null,
+  });
 
-    setLoading(true)
-    setError(null)
+  const request = useMemo(
+    () => ({ path, reloadCount }),
+    [path, reloadCount]
+  );
 
-    try {
-      const result = await api.get(path)
-      setData(result)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }, [path])
-
-  // Schedule the initial fetch asynchronously.
   useEffect(() => {
-    if (path) {
-      Promise.resolve().then(fetchData)
-    }
-  }, [path, fetchData])
+    if (!path) return;
+
+    let cancelled = false;
+
+    api
+      .get(path)
+      .then((data) => {
+        if (!cancelled) {
+          setResult({ request, data, error: null });
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setResult({ request, data: null, error: err.message });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [path, request]);
+
+  const refetch = useCallback(() => {
+    setReloadCount((count) => count + 1);
+  }, []);
+
+  if (!path) {
+    return {
+      data: null,
+      loading: false,
+      error: null,
+      refetch,
+    };
+  }
+
+  const loading = result.request !== request;
 
   return {
-    data,
+    data: loading ? null : result.data,
     loading,
-    error,
-    refetch: fetchData,
-  }
+    error: loading ? null : result.error,
+    refetch,
+  };
 }

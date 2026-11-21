@@ -1,27 +1,34 @@
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+// Address of our Flask backend
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api"
+).replace(/\/+$/, "");
+
+const TOKEN_KEY = "token";
 
 // Get the saved login token
 export function getToken() {
-  return localStorage.getItem("token");
+  return localStorage.getItem(TOKEN_KEY);
 }
 
 // Save the login token
 export function saveToken(token) {
-  localStorage.setItem("token", token);
+  if (!token) {
+    throw new Error("Authentication token is missing");
+  }
+
+  localStorage.setItem(TOKEN_KEY, token);
 }
 
 // Remove the login token
 export function clearToken() {
-  localStorage.removeItem("token");
+  localStorage.removeItem(TOKEN_KEY);
 }
 
-// Send requests to the Flask backend
-async function request(path, options = {}) {
+// Reusable API request function
+async function request(method, path, data) {
   const headers = {
-    "Content-Type": "application/json",
-    ...options.headers,
+    Accept: "application/json",
   };
 
   const token = getToken();
@@ -30,41 +37,73 @@ async function request(path, options = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers,
-  });
-
-  if (response.status === 204) {
-    return null;
+  if (data !== undefined) {
+    headers["Content-Type"] = "application/json";
   }
 
-  const data = await response.json().catch(() => ({}));
+  let response;
 
-  if (!response.ok) {
+  try {
+    response = await fetch(
+      `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`,
+      {
+        method,
+        headers,
+        body: data !== undefined ? JSON.stringify(data) : undefined,
+      }
+    );
+  } catch {
     throw new Error(
-      data.message ||
-      data.error ||
-      "Something went wrong. Please try again."
+      "Unable to connect to the server. Please check your backend."
     );
   }
 
-  return data;
+  const responseText = await response.text();
+  let result = null;
+
+  if (responseText) {
+    try {
+      result = JSON.parse(responseText);
+    } catch {
+      result = responseText;
+    }
+  }
+
+  if (!response.ok) {
+    const message =
+      result?.message ||
+      result?.detail ||
+      result?.error ||
+      `Request failed with status ${response.status}`;
+
+    throw new Error(
+      typeof message === "string" ? message : JSON.stringify(message)
+    );
+  }
+
+  return result;
 }
 
 // API methods used by the frontend
 const api = {
   get(path) {
-    return request(path, {
-      method: "GET",
-    });
+    return request("GET", path);
   },
 
-  post(path, body) {
-    return request(path, {
-      method: "POST",
-      body: JSON.stringify(body),
-    });
+  post(path, data) {
+    return request("POST", path, data);
+  },
+
+  put(path, data) {
+    return request("PUT", path, data);
+  },
+
+  patch(path, data) {
+    return request("PATCH", path, data);
+  },
+
+  delete(path) {
+    return request("DELETE", path);
   },
 };
 
