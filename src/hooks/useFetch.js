@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../services/api";
 
-// Loads data from the backend. Example: const { data, loading, error } = useFetch("/campaigns");
+// Loads data from the backend.
 export default function useFetch(path) {
   const [reloadCount, setReloadCount] = useState(0);
   // The last finished request, saved together with the request it belongs to

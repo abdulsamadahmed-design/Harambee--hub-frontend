@@ -1,0 +1,41 @@
+[
+  {
+    "id": 1,
+    "title": "Clean Water for Kijiji",
+    "description": "Build a solar-powered community well for families in Kijiji.",
+    "goal_amount": "25000",
+    "raised_amount": "17850",
+    "image_url": "",
+    "status": "active",
+    "end_date": "2026-12-31",
+    "created_at": "2026-11-01",
+    "organizer_id": 12,
+    "organizer_name": "Kijiji Community Trust"
+  },
+  {
+    "id": 2,
+    "title": "School Computer Lab",
+    "description": "Equip a rural school with 20 computers and reliable internet.",
+    "goal_amount": "18000",
+    "raised_amount": "9200",
+    "image_url": "",
+    "status": "active",
+    "end_date": "2027-01-15",
+    "created_at": "2026-10-20",
+    "organizer_id": 8,
+    "organizer_name": "Bright Futures Foundation"
+  },
+  {
+    "id": 3,
+    "title": "Community Health Clinic",
+    "description": "Fund essential medical supplies for a mobile health clinic.",
+    "goal_amount": "35000",
+    "raised_amount": "35000",
+    "image_url": "",
+    "status": "completed",
+    "end_date": "2026-10-30",
+    "created_at": "2026-09-12",
+    "organizer_id": 21,
+    "organizer_name": "Health Together"
+  }
+]

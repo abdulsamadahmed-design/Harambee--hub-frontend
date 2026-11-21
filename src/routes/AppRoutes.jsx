@@ -29,36 +29,33 @@ import ManageUsers from "../pages/admin/ManageUsers";
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* PUBLIC ROUTES */}
+      {/* Public routes */}
       <Route path="/" element={<Home />} />
       <Route path="/campaigns" element={<Campaigns />} />
       <Route path="/campaigns/:id" element={<CampaignDetails />} />
 
-      {/* AUTH ROUTES */}
+      {/* Authentication */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* ORGANIZER ROUTES */}
+      {/* Organizer routes */}
       <Route element={<ProtectedRoute allowedRoles={["organizer"]} />}>
         <Route path="/organizer" element={<OrganizerDashboard />} />
         <Route path="/organizer/campaigns" element={<ManageCampaigns />} />
         <Route path="/organizer/campaigns/new" element={<CreateCampaign />} />
         <Route path="/organizer/contributions" element={<Contributions />} />
+
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/users" element={<ManageUsers />} />
       </Route>
 
-      {/* CONTRIBUTOR ROUTES */}
+      {/* Contributor routes */}
       <Route element={<ProtectedRoute allowedRoles={["contributor"]} />}>
         <Route path="/contributor" element={<ContributorDashboard />} />
         <Route path="/contributor/contributions" element={<MyContributions />} />
       </Route>
 
-      {/* ADMIN ROUTES */}
-      <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<ManageUsers />} />
-      </Route>
-
-      {/* 404 ROUTE */}
+      {/* 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
