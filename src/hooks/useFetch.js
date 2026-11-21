@@ -1,21 +1,19 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import api from "../services/api";
 
-// Loads data from the backend.
 export default function useFetch(path) {
-  const [requestId, setRequestId] = useState(0);
-  const [lastPath, setLastPath] = useState(path);
+  const [reloadCount, setReloadCount] = useState(0);
+
   const [result, setResult] = useState({
-    requestId: null,
+    request: null,
     data: null,
     error: null,
   });
 
-  // A changed path starts a new request.
-  if (path !== lastPath) {
-    setLastPath(path);
-    setRequestId((id) => id + 1);
-  }
+  const request = useMemo(
+    () => ({ path, reloadCount }),
+    [path, reloadCount]
+  );
 
   useEffect(() => {
     if (!path) return;
@@ -26,33 +24,34 @@ export default function useFetch(path) {
       .get(path)
       .then((data) => {
         if (!cancelled) {
-          setResult({ requestId, data, error: null });
+          setResult({ request, data, error: null });
         }
       })
       .catch((err) => {
         if (!cancelled) {
-          setResult({
-            requestId,
-            data: null,
-            error: err.message,
-          });
+          setResult({ request, data: null, error: err.message });
         }
       });
 
     return () => {
       cancelled = true;
     };
-  }, [path, requestId]);
+  }, [path, request]);
 
   const refetch = useCallback(() => {
-    setRequestId((id) => id + 1);
+    setReloadCount((count) => count + 1);
   }, []);
 
   if (!path) {
-    return { data: null, loading: false, error: null, refetch };
+    return {
+      data: null,
+      loading: false,
+      error: null,
+      refetch,
+    };
   }
 
-  const loading = result.requestId !== requestId;
+  const loading = result.request !== request;
 
   return {
     data: loading ? null : result.data,
