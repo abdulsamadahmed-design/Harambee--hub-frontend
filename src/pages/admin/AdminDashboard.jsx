@@ -20,7 +20,7 @@ export default function AdminDashboard() {
 
   return (
     <DashboardLayout
-      role="organizer"
+      role="admin"
       title="Platform Dashboard"
       activePath="/admin"
     >
