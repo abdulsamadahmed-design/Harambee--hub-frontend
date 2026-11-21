@@ -18,7 +18,7 @@ export default function ManageUsers() {
 
   return (
     <DashboardLayout
-      role="organizer"
+      role="admin"
       title="Manage Users"
       activePath="/admin/users"
     >
