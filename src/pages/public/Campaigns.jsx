@@ -4,6 +4,7 @@ import useFetch from "../../hooks/useFetch";
 import CampaignList from "../../components/campaigns/CampaignList";
 import {
   getCampaignsFromResponse,
+  getPagination,
   getStatus,
   getGoal,
   getEndDate,
@@ -26,11 +27,15 @@ const STATUS_OPTIONS = [
 ];
 
 export default function Campaigns() {
-  const { data, loading, error, refetch } = useFetch("/campaigns/");
+  const [page, setPage] = useState(1);
+  const { data, loading, error, refetch } = useFetch(
+    `/campaigns/?page=${page}&per_page=10`
+  );
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [sort, setSort] = useState("newest");
 
+  const pagination = getPagination(data);
   const allCampaigns = useMemo(
     () => getCampaignsFromResponse(data),
     [data]
@@ -93,7 +98,10 @@ export default function Campaigns() {
                 type="text"
                 placeholder="Search by title or description"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setPage(1);
+                }}
               />
             </div>
 
@@ -102,7 +110,10 @@ export default function Campaigns() {
               <select
                 id="m3-status"
                 value={status}
-                onChange={(event) => setStatus(event.target.value)}
+                onChange={(event) => {
+                  setStatus(event.target.value);
+                  setPage(1);
+                }}
               >
                 {STATUS_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -130,8 +141,9 @@ export default function Campaigns() {
 
           {!loading && !error && (
             <p className="m3-result-count">
-              Showing {visibleCampaigns.length} of {allCampaigns.length} campaign
-              {allCampaigns.length === 1 ? "" : "s"}
+              Showing {visibleCampaigns.length} campaign
+              {visibleCampaigns.length === 1 ? "" : "s"} on this page (
+              {pagination.total} total)
             </p>
           )}
 
@@ -142,10 +154,36 @@ export default function Campaigns() {
             onRetry={refetch}
             emptyMessage={
               allCampaigns.length > 0
-                ? "No campaigns match your filters. Try adjusting them."
-                : "No campaigns yet — check back soon."
+                ? "No campaigns match your filters on this page. Try adjusting them."
+                : pagination.total > 0
+                  ? "No campaigns on this page. Try another page."
+                  : "No campaigns yet — check back soon."
             }
           />
+
+          {!loading && !error && pagination.pages > 1 && (
+            <nav className="m3-pagination" aria-label="Campaign pages">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                disabled={page <= 1}
+                onClick={() => setPage((currentPage) => currentPage - 1)}
+              >
+                ← Previous
+              </button>
+              <span aria-live="polite">
+                Page {pagination.page} of {pagination.pages}
+              </span>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                disabled={page >= pagination.pages}
+                onClick={() => setPage((currentPage) => currentPage + 1)}
+              >
+                Next →
+              </button>
+            </nav>
+          )}
         </div>
       </div>
     </>

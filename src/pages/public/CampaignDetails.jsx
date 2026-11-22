@@ -5,6 +5,7 @@ import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
 import StatusBadge from "../../components/common/StatusBadge";
 import CampaignProgress from "../../components/campaigns/CampaignProgress";
+import PledgeForm from "../../components/pledges/PledgeForm";
 import formatDate from "../../utils/formatDate";
 import {
   getImageUrl,
@@ -23,6 +24,16 @@ export default function CampaignDetails() {
     error,
     refetch,
   } = useFetch(id ? `/campaigns/${id}/` : "");
+  const {
+    data: pledgeData,
+    error: pledgeError,
+    refetch: refetchPledges,
+  } = useFetch(id ? `/pledges/campaign/${id}/` : "");
+
+  const handlePledgeSuccess = () => {
+    refetch();
+    refetchPledges();
+  };
 
   if (loading) {
     return (
@@ -69,7 +80,11 @@ export default function CampaignDetails() {
   const status = getStatus(campaign);
   const endDate = getEndDate(campaign);
   const formattedEndDate = endDate ? formatDate(endDate) : "";
-  const raisedAmount = getRaised(campaign);
+  const pledgeRaisedAmount = Number(pledgeData?.raised_amount);
+  const raisedAmount =
+    pledgeData?.raised_amount != null && Number.isFinite(pledgeRaisedAmount)
+      ? pledgeRaisedAmount
+      : getRaised(campaign);
 
   return (
     <>
@@ -120,22 +135,22 @@ export default function CampaignDetails() {
               size="large"
             />
 
-            <div id="pledge-slot" data-campaign-id={campaign.id}>
-              <div className="m3-pledge-slot">
-                <p style={{ margin: 0 }}>
-                  Pledges open soon.{" "}
-                  <Link
-                    to="/login"
-                    style={{
-                      color: "var(--color-primary)",
-                      fontWeight: 600,
-                    }}
-                  >
-                    Login
-                  </Link>{" "}
-                  to get notified.
-                </p>
-              </div>
+            {pledgeError && (
+              <ErrorMessage
+                message={pledgeError}
+                onRetry={refetchPledges}
+              />
+            )}
+
+            <div
+              id="pledge-slot"
+              data-campaign-id={campaign.id}
+              style={{ marginTop: "24px" }}
+            >
+              <PledgeForm
+                campaignId={campaign.id}
+                onSuccess={handlePledgeSuccess}
+              />
             </div>
             </aside>
           </div>
