@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import Navbar from "../../components/layout/Navbar";
 import useFetch from "../../hooks/useFetch";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
@@ -21,50 +22,66 @@ export default function CampaignDetails() {
     loading,
     error,
     refetch,
-  } = useFetch(id ? `/campaigns/${id}` : "");
+  } = useFetch(id ? `/campaigns/${id}/` : "");
 
-  if (loading) return <Loader text="Loading campaign..." />;
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <Loader text="Loading campaign..." />
+      </>
+    );
+  }
 
   if (error) {
     return (
-      <div className="m3-detail">
-        <div className="container">
-          <Link to="/campaigns" className="m3-detail-back">
-            ← Back to campaigns
-          </Link>
-          <ErrorMessage message={error} onRetry={refetch} />
+      <>
+        <Navbar />
+        <div className="m3-detail">
+          <div className="container">
+            <Link to="/campaigns" className="m3-detail-back">
+              ← Back to campaigns
+            </Link>
+            <ErrorMessage message={error} onRetry={refetch} />
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (!campaign) {
     return (
-      <div className="m3-detail">
-        <div className="container">
-          <Link to="/campaigns" className="m3-detail-back">
-            ← Back to campaigns
-          </Link>
-          <p>Campaign not found.</p>
+      <>
+        <Navbar />
+        <div className="m3-detail">
+          <div className="container">
+            <Link to="/campaigns" className="m3-detail-back">
+              ← Back to campaigns
+            </Link>
+            <p>Campaign not found.</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   const image = getImageUrl(campaign);
   const status = getStatus(campaign);
   const endDate = getEndDate(campaign);
+  const formattedEndDate = endDate ? formatDate(endDate) : "";
   const raisedAmount = getRaised(campaign);
 
   return (
-    <div className="m3-detail">
-      <div className="container">
-        <Link to="/campaigns" className="m3-detail-back">
-          ← Back to campaigns
-        </Link>
+    <>
+      <Navbar />
+      <div className="m3-detail">
+        <div className="container">
+          <Link to="/campaigns" className="m3-detail-back">
+            ← Back to campaigns
+          </Link>
 
-        <div className="m3-detail-grid">
-          <div>
+          <div className="m3-detail-grid">
+            <div>
             <div className="m3-detail-image-wrap">
               {image ? (
                 <img
@@ -86,11 +103,11 @@ export default function CampaignDetails() {
 
             <h1 className="m3-detail-title">{campaign.title}</h1>
 
-            <div className="m3-detail-meta">
-              <StatusBadge status={status} />
-              <span>by {getOrganizerName(campaign)}</span>
-              {endDate && <span>Ends {formatDate(endDate)}</span>}
-            </div>
+              <div className="m3-detail-meta">
+                <StatusBadge status={status} />
+                <span>by {getOrganizerName(campaign)}</span>
+                {formattedEndDate && <span>Ends {formattedEndDate}</span>}
+              </div>
 
             <div className="m3-detail-description">{campaign.description}</div>
           </div>
@@ -120,9 +137,10 @@ export default function CampaignDetails() {
                 </p>
               </div>
             </div>
-          </aside>
+            </aside>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
