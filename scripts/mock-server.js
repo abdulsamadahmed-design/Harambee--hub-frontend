@@ -7,16 +7,37 @@ const PORT = 3001;
 
 // Lists come back in the same paginated shape as the real backend
 function paginate(list, query) {
-  const page = Number(query.get("page")) || 1;
-  const perPage = Number(query.get("per_page")) || 10;
+  const rawPage = query.get("page");
+  const rawPerPage = query.get("per_page");
+
+  const page = rawPage === null ? 1 : Number(rawPage);
+  const requestedPerPage = rawPerPage === null ? 10 : Number(rawPerPage);
+
+  if (!Number.isInteger(page) || page < 1) {
+    return { error: "page must be a valid integer and at least 1" };
+  }
+
+  if (!Number.isInteger(requestedPerPage) || requestedPerPage < 1) {
+    return { error: "per_page must be a valid integer and at least 1" };
+  }
+
+  const perPage = Math.min(requestedPerPage, 100);
   const start = (page - 1) * perPage;
+
   return {
     items: list.slice(start, start + perPage),
     page,
     per_page: perPage,
     total: list.length,
-    pages: Math.max(1, Math.ceil(list.length / perPage)),
+    pages: Math.ceil(list.length / perPage),
   };
+}
+
+
+function sendPaginated(res, list, query) {
+  const result = paginate(list, query);
+  if (result.error) return send(res, 400, result);
+  return send(res, 200, result);
 }
 
 function send(res, status, body) {
@@ -67,7 +88,7 @@ const server = http.createServer(async (req, res) => {
     let list = db.campaigns;
     if (query.get("category")) list = list.filter((c) => c.category === query.get("category"));
     if (query.get("status")) list = list.filter((c) => c.status === query.get("status"));
-    return send(res, 200, paginate(list, query));
+    return sendPaginated(res, list, query);
   }
 
   // /api/campaigns/1 and /api/campaigns/1/pledges
@@ -76,7 +97,7 @@ const server = http.createServer(async (req, res) => {
     const id = Number(match[1]);
     const campaign = db.campaigns.find((c) => c.id === id);
     if (!campaign) return send(res, 404, { error: "Not found" });
-    if (match[2]) return send(res, 200, paginate(db.pledges.filter((p) => p.campaign_id === id), query));
+    if (match[2]) return sendPaginated(res, db.pledges.filter((p) => p.campaign_id === id), query);
     return send(res, 200, campaign);
   }
 
