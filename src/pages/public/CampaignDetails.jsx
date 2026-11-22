@@ -1,4 +1,6 @@
+import { useContext } from "react";
 import { Link, useParams } from "react-router-dom";
+import { AuthContext } from "../../context/authContextValue";
 import Navbar from "../../components/layout/Navbar";
 import useFetch from "../../hooks/useFetch";
 import Loader from "../../components/common/Loader";
@@ -17,6 +19,7 @@ import {
 import "./campaigns.css";
 
 export default function CampaignDetails() {
+  const { user, isAuthenticated } = useContext(AuthContext);
   const { id } = useParams();
   const {
     data: campaign,
@@ -147,10 +150,43 @@ export default function CampaignDetails() {
               data-campaign-id={campaign.id}
               style={{ marginTop: "24px" }}
             >
-              <PledgeForm
-                campaignId={campaign.id}
-                onSuccess={handlePledgeSuccess}
-              />
+              {!isAuthenticated ? (
+                <div
+                  className="m3-pledge-slot"
+                  style={{
+                    textAlign: "center",
+                    padding: "24px",
+                    background: "var(--color-background)",
+                    borderRadius: "8px",
+                    border: "1px solid var(--color-border)",
+                  }}
+                >
+                  <p style={{ marginBottom: "16px", fontWeight: "500" }}>
+                    Want to support this campaign?
+                  </p>
+                  <Link to="/login" className="btn btn-primary">
+                    Log in to pledge
+                  </Link>
+                </div>
+              ) : user?.role !== "contributor" ? (
+                <div
+                  className="m3-pledge-slot"
+                  style={{
+                    textAlign: "center",
+                    padding: "24px",
+                    background: "var(--color-background)",
+                    borderRadius: "8px",
+                    color: "var(--color-text-muted)",
+                  }}
+                >
+                  <p>Only contributors can make pledges.</p>
+                </div>
+              ) : (
+                <PledgeForm
+                  campaignId={campaign.id}
+                  onSuccess={handlePledgeSuccess}
+                />
+              )}
             </div>
             </aside>
           </div>
