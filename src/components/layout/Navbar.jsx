@@ -1,7 +1,24 @@
 
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/useAuth";
 
 function Navbar() {
+  const { user, loading, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const dashboardRoutes = {
+    organizer: "/organizer",
+    contributor: "/contributor",
+    admin: "/admin",
+  };
+
+  const dashboardPath = user ? dashboardRoutes[user.role] : null;
+
+  function handleLogout() {
+    logout();
+    navigate("/", { replace: true });
+  }
+
   return (
     <header className="navbar">
       <div className="navbar-container">
@@ -15,18 +32,37 @@ function Navbar() {
         </nav>
 
         <div className="navbar-actions">
-          <Link to="/login" className="navbar-login">
-            Login
-          </Link>
+          {!loading && isAuthenticated ? (
+            <>
+              {dashboardPath && (
+                <Link to={dashboardPath} className="navbar-login">
+                  Dashboard
+                </Link>
+              )}
 
-          <Link to="/register" className="navbar-register">
-            Get Started
-          </Link>
+              <button
+                type="button"
+                className="navbar-register"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </>
+          ) : !loading ? (
+            <>
+              <Link to="/login" className="navbar-login">
+                Login
+              </Link>
+
+              <Link to="/register" className="navbar-register">
+                Get Started
+              </Link>
+            </>
+          ) : null}
         </div>
       </div>
     </header>
-  )
+  );
 }
 
-export default Navbar
-
+export default Navbar;

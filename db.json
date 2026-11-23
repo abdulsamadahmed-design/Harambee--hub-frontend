@@ -1,0 +1,102 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Amina Wanjiru",
+      "email": "amina@example.com",
+      "role": "organizer",
+      "email_verified": true
+    },
+    {
+      "id": 2,
+      "name": "Brian Otieno",
+      "email": "brian@example.com",
+      "role": "contributor",
+      "email_verified": true
+    },
+    {
+      "id": 3,
+      "name": "Site Admin",
+      "email": "admin@example.com",
+      "role": "admin",
+      "email_verified": true
+    }
+  ],
+  "campaigns": [
+    {
+      "id": 1,
+      "title": "School fees for Wanjiku",
+      "description": "Help Wanjiku return to school for the new term.",
+      "goal_amount": "50000.00",
+      "status": "active",
+      "organizer_id": 1,
+      "image_url": null,
+      "created_at": "2026-11-01T09:00:00",
+      "end_date": "2026-11-25T23:59:59"
+    },
+    {
+      "id": 2,
+      "title": "Wedding fundraiser for Kevin and Mary",
+      "description": "Contributions towards the wedding of Kevin and Mary.",
+      "goal_amount": "120000.00",
+      "status": "active",
+      "organizer_id": 1,
+      "image_url": null,
+      "created_at": "2026-11-03T10:30:00",
+      "end_date": "2026-12-31T23:59:59"
+    },
+    {
+      "id": 3,
+      "title": "Funeral support for Mzee Otieno",
+      "description": "Support the family during this difficult time.",
+      "goal_amount": "80000.00",
+      "status": "closed",
+      "organizer_id": 1,
+      "image_url": null,
+      "created_at": "2026-10-20T08:15:00",
+      "end_date": "2026-11-10T23:59:59"
+    }
+  ],
+  "pledges": [
+    {
+      "id": 1,
+      "campaign_id": 1,
+      "contributor_id": 2,
+      "amount": 5000,
+      "message": "God bless",
+      "is_anonymous": false,
+      "status": "confirmed",
+      "created_at": "2026-11-02T12:00:00"
+    },
+    {
+      "id": 2,
+      "campaign_id": 1,
+      "contributor_id": 2,
+      "amount": 2000,
+      "message": "",
+      "is_anonymous": true,
+      "status": "pending",
+      "created_at": "2026-11-04T14:20:00"
+    },
+    {
+      "id": 3,
+      "campaign_id": 2,
+      "contributor_id": 2,
+      "amount": 10000,
+      "message": "Congratulations!",
+      "is_anonymous": false,
+      "status": "confirmed",
+      "created_at": "2026-11-05T16:45:00"
+    },
+    {
+      "id": 4,
+      "campaign_id": 3,
+      "contributor_id": 2,
+      "amount": 3000,
+      "message": "With you in prayer",
+      "is_anonymous": false,
+      "status": "confirmed",
+      "created_at": "2026-10-22T11:10:00"
+    }
+  ]
+}

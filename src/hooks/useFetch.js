@@ -1,40 +1,63 @@
-
-import { useState, useEffect, useCallback } from 'react'
-import api from '../services/api'
+import { useState, useEffect, useCallback } from "react";
+import api from "../services/api";
 
 // Loads data from the backend.
 export default function useFetch(path) {
-  const [data, setData] = useState(null)
-  const [loading, setLoading] = useState(Boolean(path))
-  const [error, setError] = useState(null)
+  const [requestId, setRequestId] = useState(0);
+  const [lastPath, setLastPath] = useState(path);
+  const [result, setResult] = useState({
+    requestId: null,
+    data: null,
+    error: null,
+  });
 
-  const fetchData = useCallback(async () => {
-    if (!path) return
+  // A changed path starts a new request.
+  if (path !== lastPath) {
+    setLastPath(path);
+    setRequestId((id) => id + 1);
+  }
 
-    setLoading(true)
-    setError(null)
-
-    try {
-      const result = await api.get(path)
-      setData(result)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }, [path])
-
-  // Schedule the initial fetch asynchronously.
   useEffect(() => {
-    if (path) {
-      Promise.resolve().then(fetchData)
-    }
-  }, [path, fetchData])
+    if (!path) return;
+
+    let cancelled = false;
+
+    api
+      .get(path)
+      .then((data) => {
+        if (!cancelled) {
+          setResult({ requestId, data, error: null });
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setResult({
+            requestId,
+            data: null,
+            error: err.message,
+          });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [path, requestId]);
+
+  const refetch = useCallback(() => {
+    setRequestId((id) => id + 1);
+  }, []);
+
+  if (!path) {
+    return { data: null, loading: false, error: null, refetch };
+  }
+
+  const loading = result.requestId !== requestId;
 
   return {
-    data,
+    data: loading ? null : result.data,
     loading,
-    error,
-    refetch: fetchData,
-  }
+    error: loading ? null : result.error,
+    refetch,
+  };
 }

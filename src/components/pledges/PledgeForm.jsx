@@ -11,8 +11,7 @@ export default function PledgeForm({ campaignId, onSuccess }) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const contributorName =
-    user?.name || user?.full_name || user?.username || 'Your account'
+  const contributorName = user?.name || user?.full_name || 'Your account'
 
   async function handleSubmit(event) {
     event.preventDefault()

@@ -40,12 +40,13 @@ export default function PledgeTable({
           {pledges.map((pledge) => {
             const contributorName =
               pledge.contributor?.name ||
-              pledge.contributor_name ||
               pledge.user?.name ||
               pledge.user?.full_name ||
+              pledge.contributor_name ||
               'Name unavailable'
 
             const isBusy = busyId === pledge.id
+            const isPending = pledge.status === 'pending'
 
             return (
               <tr key={pledge.id}>
@@ -60,7 +61,7 @@ export default function PledgeTable({
                 {(onConfirm || onDelete) && (
                   <td>
                     <div className="table-actions">
-                      {onConfirm && pledge.status === 'pending' && (
+                      {onConfirm && isPending && (
                         <Button
                           size="small"
                           onClick={() => onConfirm(pledge)}
@@ -71,7 +72,7 @@ export default function PledgeTable({
                         </Button>
                       )}
 
-                      {onDelete && (
+                      {onDelete && isPending && (
                         <Button
                           size="small"
                           variant="danger"
