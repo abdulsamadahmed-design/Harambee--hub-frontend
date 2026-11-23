@@ -12,7 +12,6 @@ function CreateCampaign() {
     title: '',
     description: '',
     goal_amount: '',
-    image_url: '',
     end_date: '',
   })
 
@@ -78,7 +77,6 @@ function CreateCampaign() {
       title: formData.title.trim(),
       description: formData.description.trim(),
       goal_amount: Number(formData.goal_amount).toFixed(2),
-      image_url: formData.image_url.trim() || null,
       end_date: formData.end_date
         ? new Date(`${formData.end_date}T23:59:59`).toISOString()
         : null,
@@ -150,14 +148,7 @@ function CreateCampaign() {
           required
         />
 
-        <Input
-          label="Image URL (optional)"
-          name="image_url"
-          type="url"
-          value={formData.image_url}
-          onChange={handleChange}
-          placeholder="https://example.com/image.jpg"
-        />
+
 
         <Input
           label="End Date (optional)"

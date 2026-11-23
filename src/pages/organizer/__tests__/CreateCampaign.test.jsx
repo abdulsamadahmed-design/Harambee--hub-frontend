@@ -58,7 +58,6 @@ describe('CreateCampaign', () => {
     expect(screen.getByLabelText('Campaign Title')).toBeInTheDocument()
     expect(screen.getByLabelText('Description')).toBeInTheDocument()
     expect(screen.getByLabelText('Fundraising Goal (KSh)')).toBeInTheDocument()
-    expect(screen.getByLabelText('Image URL (optional)')).toBeInTheDocument()
     expect(screen.getByLabelText('End Date (optional)')).toBeInTheDocument()
   })
 
@@ -158,7 +157,6 @@ describe('CreateCampaign', () => {
         title: 'School Fees Campaign',
         description: 'Help students pay their school fees.',
         goal_amount: '5000.00',
-        image_url: null,
         end_date: null,
       })
     })
