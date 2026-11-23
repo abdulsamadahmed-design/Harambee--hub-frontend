@@ -26,12 +26,12 @@ export default function CampaignDetails() {
     loading,
     error,
     refetch,
-  } = useFetch(id ? `/campaigns/${id}/` : "");
+  } = useFetch(id ? `/campaigns/${id}` : "");
   const {
     data: pledgeData,
     error: pledgeError,
     refetch: refetchPledges,
-  } = useFetch(id ? `/pledges/campaign/${id}/` : "");
+  } = useFetch(id ? `/pledges/campaign/${id}` : "");
 
   const handlePledgeSuccess = () => {
     refetch();
