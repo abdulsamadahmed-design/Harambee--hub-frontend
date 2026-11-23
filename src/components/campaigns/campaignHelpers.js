@@ -28,7 +28,8 @@ export function getPagination(data) {
 }
 
 export function getGoal(campaign) {
-  return Number(campaign?.goal_amount ?? campaign?.goalAmount ?? 0)
+  const goal = Number(campaign?.goal_amount ?? campaign?.goalAmount ?? 0)
+  return Number.isFinite(goal) ? goal : 0
 }
 
 export function getRaised(campaign) {
