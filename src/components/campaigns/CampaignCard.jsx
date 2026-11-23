@@ -14,6 +14,7 @@ export default function CampaignCard({ campaign }) {
   const status = getStatus(campaign);
   const image = getImageUrl(campaign);
   const endDate = getEndDate(campaign);
+  const formattedEndDate = endDate ? formatDate(endDate) : "";
   const raisedAmount = getRaised(campaign);
 
   return (
@@ -61,8 +62,8 @@ export default function CampaignCard({ campaign }) {
           size="small"
         />
 
-        {endDate && (
-          <p className="m3-card-deadline">Ends {formatDate(endDate)}</p>
+        {formattedEndDate && (
+          <p className="m3-card-deadline">Ends {formattedEndDate}</p>
         )}
 
         <div className="m3-card-actions">

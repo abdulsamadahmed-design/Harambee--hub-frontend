@@ -12,7 +12,9 @@ export default function CampaignProgress({
   const raised =
     raisedAmount !== undefined ? Number(raisedAmount) : getRaised(campaign);
   const percent =
-    goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
+    goal > 0 && Number.isFinite(raised)
+      ? Math.min(100, Math.round((raised / goal) * 100))
+      : 0;
   const remaining = daysLeft(getEndDate(campaign));
 
   const daysLabel =

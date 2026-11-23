@@ -28,17 +28,19 @@ export function getPagination(data) {
 }
 
 export function getGoal(campaign) {
-  return Number(campaign?.goal_amount ?? campaign?.goalAmount ?? 0)
+  const goal = Number(campaign?.goal_amount ?? campaign?.goalAmount ?? 0)
+  return Number.isFinite(goal) ? goal : 0
 }
 
 export function getRaised(campaign) {
   // Backend may expose this later as raised_amount / total_pledged / pledged_amount.
-  return Number(
+  const raised = Number(
     campaign?.raised_amount ??
       campaign?.total_pledged ??
       campaign?.pledged_amount ??
       0
   )
+  return Number.isFinite(raised) ? raised : 0
 }
 
 export function getEndDate(campaign) {
@@ -57,7 +59,8 @@ export function getOrganizerName(campaign) {
 }
 
 export function getStatus(campaign) {
-  return String(campaign?.status ?? "active").toLowerCase()
+  const status = String(campaign?.status ?? "active").toLowerCase()
+  return status === "closed" ? "completed" : status
 }
 
 export function daysLeft(endDate) {
@@ -70,7 +73,7 @@ export function daysLeft(endDate) {
 
 export function progressPercent(campaign) {
   const goal = getGoal(campaign)
-  if (goal <= 0) return 0
+  if (!Number.isFinite(goal) || goal <= 0) return 0
   const raised = getRaised(campaign)
   return Math.min(100, Math.max(0, Math.round((raised / goal) * 100)))
 }

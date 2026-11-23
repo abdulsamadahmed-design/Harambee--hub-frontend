@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
+import Navbar from "../../components/layout/Navbar";
 import useFetch from "../../hooks/useFetch";
 import CampaignList from "../../components/campaigns/CampaignList";
 import {
   getCampaignsFromResponse,
+  getPagination,
   getStatus,
   getGoal,
   getEndDate,
@@ -25,11 +27,15 @@ const STATUS_OPTIONS = [
 ];
 
 export default function Campaigns() {
-  const { data, loading, error, refetch } = useFetch("/campaigns");
+  const [page, setPage] = useState(1);
+  const { data, loading, error, refetch } = useFetch(
+    `/campaigns/?page=${page}&per_page=10`
+  );
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [sort, setSort] = useState("newest");
 
+  const pagination = getPagination(data);
   const allCampaigns = useMemo(
     () => getCampaignsFromResponse(data),
     [data]
@@ -73,77 +79,113 @@ export default function Campaigns() {
   }, [allCampaigns, search, status, sort]);
 
   return (
-    <div className="m3-page">
-      <div className="container">
-        <header className="m3-page-header">
-          <h1 className="m3-page-title">Campaigns</h1>
-          <p className="m3-page-subtitle">
-            Discover causes and make a difference.
-          </p>
-        </header>
+    <>
+      <Navbar />
+      <div className="m3-page">
+        <div className="container">
+          <header className="m3-page-header">
+            <h1 className="m3-page-title">Campaigns</h1>
+            <p className="m3-page-subtitle">
+              Discover causes and make a difference.
+            </p>
+          </header>
 
-        <div className="m3-toolbar">
-          <div className="form-group">
-            <label htmlFor="m3-search">Search</label>
-            <input
-              id="m3-search"
-              type="text"
-              placeholder="Search by title or description"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
+          <div className="m3-toolbar">
+            <div className="form-group">
+              <label htmlFor="m3-search">Search</label>
+              <input
+                id="m3-search"
+                type="text"
+                placeholder="Search by title or description"
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="m3-status">Status</label>
+              <select
+                id="m3-status"
+                value={status}
+                onChange={(event) => {
+                  setStatus(event.target.value);
+                  setPage(1);
+                }}
+              >
+                {STATUS_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="m3-sort">Sort</label>
+              <select
+                id="m3-sort"
+                value={sort}
+                onChange={(event) => setSort(event.target.value)}
+              >
+                {SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="m3-status">Status</label>
-            <select
-              id="m3-status"
-              value={status}
-              onChange={(event) => setStatus(event.target.value)}
-            >
-              {STATUS_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          {!loading && !error && (
+            <p className="m3-result-count">
+              Showing {visibleCampaigns.length} campaign
+              {visibleCampaigns.length === 1 ? "" : "s"} on this page (
+              {pagination.total} total)
+            </p>
+          )}
 
-          <div className="form-group">
-            <label htmlFor="m3-sort">Sort</label>
-            <select
-              id="m3-sort"
-              value={sort}
-              onChange={(event) => setSort(event.target.value)}
-            >
-              {SORT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <CampaignList
+            campaigns={visibleCampaigns}
+            loading={loading}
+            error={error}
+            onRetry={refetch}
+            emptyMessage={
+              allCampaigns.length > 0
+                ? "No campaigns match your filters on this page. Try adjusting them."
+                : pagination.total > 0
+                  ? "No campaigns on this page. Try another page."
+                  : "No campaigns yet — check back soon."
+            }
+          />
+
+          {!loading && !error && pagination.pages > 1 && (
+            <nav className="m3-pagination" aria-label="Campaign pages">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                disabled={page <= 1}
+                onClick={() => setPage((currentPage) => currentPage - 1)}
+              >
+                ← Previous
+              </button>
+              <span aria-live="polite">
+                Page {pagination.page} of {pagination.pages}
+              </span>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                disabled={page >= pagination.pages}
+                onClick={() => setPage((currentPage) => currentPage + 1)}
+              >
+                Next →
+              </button>
+            </nav>
+          )}
         </div>
-
-        {!loading && !error && (
-          <p className="m3-result-count">
-            Showing {visibleCampaigns.length} of {allCampaigns.length} campaign
-            {allCampaigns.length === 1 ? "" : "s"}
-          </p>
-        )}
-
-        <CampaignList
-          campaigns={visibleCampaigns}
-          loading={loading}
-          error={error}
-          onRetry={refetch}
-          emptyMessage={
-            allCampaigns.length > 0
-              ? "No campaigns match your filters. Try adjusting them."
-              : "No campaigns yet — check back soon."
-          }
-        />
       </div>
-    </div>
+    </>
   );
 }

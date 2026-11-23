@@ -48,7 +48,7 @@ const steps = [
 ];
 
 export default function Home() {
-  const { data, loading, error, refetch } = useFetch("/campaigns");
+  const { data, loading, error, refetch } = useFetch("/campaigns/");
 
   const allCampaigns = getCampaignsFromResponse(data);
   const featured = allCampaigns

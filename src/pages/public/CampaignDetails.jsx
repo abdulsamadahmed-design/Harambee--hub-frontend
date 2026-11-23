@@ -1,9 +1,13 @@
+import { useContext } from "react";
 import { Link, useParams } from "react-router-dom";
+import { AuthContext } from "../../context/authContextValue";
+import Navbar from "../../components/layout/Navbar";
 import useFetch from "../../hooks/useFetch";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
 import StatusBadge from "../../components/common/StatusBadge";
 import CampaignProgress from "../../components/campaigns/CampaignProgress";
+import PledgeForm from "../../components/pledges/PledgeForm";
 import formatDate from "../../utils/formatDate";
 import {
   getImageUrl,
@@ -15,6 +19,7 @@ import {
 import "./campaigns.css";
 
 export default function CampaignDetails() {
+  const { user, isAuthenticated } = useContext(AuthContext);
   const { id } = useParams();
   const {
     data: campaign,
@@ -22,49 +27,79 @@ export default function CampaignDetails() {
     error,
     refetch,
   } = useFetch(id ? `/campaigns/${id}` : "");
+  const {
+    data: pledgeData,
+    error: pledgeError,
+    refetch: refetchPledges,
+  } = useFetch(id ? `/pledges/campaign/${id}` : "");
 
-  if (loading) return <Loader text="Loading campaign..." />;
+  const handlePledgeSuccess = () => {
+    refetch();
+    refetchPledges();
+  };
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <Loader text="Loading campaign..." />
+      </>
+    );
+  }
 
   if (error) {
     return (
-      <div className="m3-detail">
-        <div className="container">
-          <Link to="/campaigns" className="m3-detail-back">
-            ← Back to campaigns
-          </Link>
-          <ErrorMessage message={error} onRetry={refetch} />
+      <>
+        <Navbar />
+        <div className="m3-detail">
+          <div className="container">
+            <Link to="/campaigns" className="m3-detail-back">
+              ← Back to campaigns
+            </Link>
+            <ErrorMessage message={error} onRetry={refetch} />
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (!campaign) {
     return (
-      <div className="m3-detail">
-        <div className="container">
-          <Link to="/campaigns" className="m3-detail-back">
-            ← Back to campaigns
-          </Link>
-          <p>Campaign not found.</p>
+      <>
+        <Navbar />
+        <div className="m3-detail">
+          <div className="container">
+            <Link to="/campaigns" className="m3-detail-back">
+              ← Back to campaigns
+            </Link>
+            <p>Campaign not found.</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   const image = getImageUrl(campaign);
   const status = getStatus(campaign);
   const endDate = getEndDate(campaign);
-  const raisedAmount = getRaised(campaign);
+  const formattedEndDate = endDate ? formatDate(endDate) : "";
+  const pledgeRaisedAmount = Number(pledgeData?.raised_amount);
+  const raisedAmount =
+    pledgeData?.raised_amount != null && Number.isFinite(pledgeRaisedAmount)
+      ? pledgeRaisedAmount
+      : getRaised(campaign);
 
   return (
-    <div className="m3-detail">
-      <div className="container">
-        <Link to="/campaigns" className="m3-detail-back">
-          ← Back to campaigns
-        </Link>
+    <>
+      <Navbar />
+      <div className="m3-detail">
+        <div className="container">
+          <Link to="/campaigns" className="m3-detail-back">
+            ← Back to campaigns
+          </Link>
 
-        <div className="m3-detail-grid">
-          <div>
+          <div className="m3-detail-grid">
+            <div>
             <div className="m3-detail-image-wrap">
               {image ? (
                 <img
@@ -86,11 +121,11 @@ export default function CampaignDetails() {
 
             <h1 className="m3-detail-title">{campaign.title}</h1>
 
-            <div className="m3-detail-meta">
-              <StatusBadge status={status} />
-              <span>by {getOrganizerName(campaign)}</span>
-              {endDate && <span>Ends {formatDate(endDate)}</span>}
-            </div>
+              <div className="m3-detail-meta">
+                <StatusBadge status={status} />
+                <span>by {getOrganizerName(campaign)}</span>
+                {formattedEndDate && <span>Ends {formattedEndDate}</span>}
+              </div>
 
             <div className="m3-detail-description">{campaign.description}</div>
           </div>
@@ -103,26 +138,60 @@ export default function CampaignDetails() {
               size="large"
             />
 
-            <div id="pledge-slot" data-campaign-id={campaign.id}>
-              <div className="m3-pledge-slot">
-                <p style={{ margin: 0 }}>
-                  Pledges open soon.{" "}
-                  <Link
-                    to="/login"
-                    style={{
-                      color: "var(--color-primary)",
-                      fontWeight: 600,
-                    }}
-                  >
-                    Login
-                  </Link>{" "}
-                  to get notified.
-                </p>
-              </div>
+            {pledgeError && (
+              <ErrorMessage
+                message={pledgeError}
+                onRetry={refetchPledges}
+              />
+            )}
+
+            <div
+              id="pledge-slot"
+              data-campaign-id={campaign.id}
+              style={{ marginTop: "24px" }}
+            >
+              {!isAuthenticated ? (
+                <div
+                  className="m3-pledge-slot"
+                  style={{
+                    textAlign: "center",
+                    padding: "24px",
+                    background: "var(--color-background)",
+                    borderRadius: "8px",
+                    border: "1px solid var(--color-border)",
+                  }}
+                >
+                  <p style={{ marginBottom: "16px", fontWeight: "500" }}>
+                    Want to support this campaign?
+                  </p>
+                  <Link to="/login" className="btn btn-primary">
+                    Log in to pledge
+                  </Link>
+                </div>
+              ) : user?.role !== "contributor" ? (
+                <div
+                  className="m3-pledge-slot"
+                  style={{
+                    textAlign: "center",
+                    padding: "24px",
+                    background: "var(--color-background)",
+                    borderRadius: "8px",
+                    color: "var(--color-text-muted)",
+                  }}
+                >
+                  <p>Only contributors can make pledges.</p>
+                </div>
+              ) : (
+                <PledgeForm
+                  campaignId={campaign.id}
+                  onSuccess={handlePledgeSuccess}
+                />
+              )}
             </div>
-          </aside>
+            </aside>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
