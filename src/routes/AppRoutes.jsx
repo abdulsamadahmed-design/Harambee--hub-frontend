@@ -26,6 +26,8 @@ import MyContributions from "../pages/contributor/MyContributions";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import ManageUsers from "../pages/admin/ManageUsers";
 
+import ResetPassword from "../pages/auth/ResetPassword";
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -37,6 +39,7 @@ export default function AppRoutes() {
       {/* Authentication */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
     {/* Organizer routes */}
      <Route element={<ProtectedRoute allowedRoles={["organizer"]} />}>

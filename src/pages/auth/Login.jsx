@@ -124,6 +124,10 @@ export default function Login() {
           Log In
         </Button>
       </form>
+      <p style={{ marginTop: "16px" }}>
+        Forgot your password?{" "}
+        <Link to="/reset-password">Reset it here</Link>
+      </p>
 
       <p style={{ marginTop: "20px" }}>
         Don't have an account?{" "}
