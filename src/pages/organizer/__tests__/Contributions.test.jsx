@@ -1,10 +1,18 @@
+
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import Contributions from '../Contributions'
 import useFetch from '../../../hooks/useFetch'
+import api from '../../../services/api'
 
 vi.mock('../../../hooks/useFetch')
+
+vi.mock('../../../services/api', () => ({
+  default: {
+    post: vi.fn(),
+  },
+}))
 
 vi.mock('../../../components/layout/DashboardLayout', () => ({
   default: ({ children, title }) => (
@@ -62,6 +70,7 @@ describe('Contributions', () => {
       data: { items: [] },
       loading: false,
       error: null,
+      refetch: vi.fn(),
     })
 
     renderPage()
@@ -84,6 +93,7 @@ describe('Contributions', () => {
       data: null,
       loading: true,
       error: null,
+      refetch: vi.fn(),
     })
 
     renderPage()
@@ -98,6 +108,7 @@ describe('Contributions', () => {
       data: null,
       loading: false,
       error: 'Failed to load contributions',
+      refetch: vi.fn(),
     })
 
     renderPage()
@@ -112,6 +123,7 @@ describe('Contributions', () => {
       data: { items: [], total: 0 },
       loading: false,
       error: null,
+      refetch: vi.fn(),
     })
 
     renderPage()
@@ -144,6 +156,7 @@ describe('Contributions', () => {
       },
       loading: false,
       error: null,
+      refetch: vi.fn(),
     })
 
     renderPage()
@@ -172,6 +185,7 @@ describe('Contributions', () => {
       },
       loading: false,
       error: null,
+      refetch: vi.fn(),
     })
 
     renderPage()
@@ -179,5 +193,40 @@ describe('Contributions', () => {
     expect(screen.getByText('Anonymous')).toBeInTheDocument()
     expect(screen.getAllByText('Campaign')).toHaveLength(2)
     expect(screen.getByText('pending')).toBeInTheDocument()
+  })
+
+  it('confirms a pending pledge and refreshes contributions', async () => {
+    const refetch = vi.fn()
+
+    useFetch.mockReturnValue({
+      data: {
+        total: 1,
+        items: [
+          {
+            id: 11,
+            contributor: { name: 'John Doe' },
+            campaign: { title: 'School Fees Campaign' },
+            amount: 5000,
+            status: 'pending',
+          },
+        ],
+      },
+      loading: false,
+      error: null,
+      refetch,
+    })
+
+    api.post.mockResolvedValue({})
+
+    renderPage()
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Confirm' })
+    )
+
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledWith('/pledges/11/confirm')
+      expect(refetch).toHaveBeenCalled()
+    })
   })
 })
