@@ -1,10 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import ManageUsers from './ManageUsers'
 import useFetch from '../../hooks/useFetch'
+import api from '../../services/api'
 
 vi.mock('../../hooks/useFetch', () => ({
   default: vi.fn(),
+}))
+
+vi.mock('../../services/api', () => ({
+  default: {
+    post: vi.fn(),
+  },
 }))
 
 vi.mock('../../components/layout/DashboardLayout', () => ({
@@ -105,7 +112,6 @@ describe('ManageUsers', () => {
         ],
         total: 1,
         pages: 1,
-        page: 1,
       },
       loading: false,
       error: '',
@@ -122,7 +128,12 @@ describe('ManageUsers', () => {
     useFetch.mockReturnValue({
       data: {
         items: [
-          { id: 1, name: 'Amina', email: 'amina@example.com', role: 'organizer' },
+          {
+            id: 1,
+            name: 'Amina',
+            email: 'amina@example.com',
+            role: 'organizer',
+          },
         ],
         pages: 1,
       },
@@ -196,7 +207,14 @@ describe('ManageUsers', () => {
   it('shows pagination and moves to the next page', async () => {
     useFetch.mockReturnValue({
       data: {
-        items: [{ id: 1, name: 'Amina', email: 'amina@example.com', role: 'organizer' }],
+        items: [
+          {
+            id: 1,
+            name: 'Amina',
+            email: 'amina@example.com',
+            role: 'organizer',
+          },
+        ],
         total: 11,
         pages: 2,
         page: 1,
@@ -209,17 +227,27 @@ describe('ManageUsers', () => {
     render(<ManageUsers />)
 
     expect(screen.getByText('Page 1 of 2')).toBeInTheDocument()
+
     await act(async () => {
       screen.getByRole('button', { name: 'Next' }).click()
     })
 
-    expect(useFetch).toHaveBeenLastCalledWith('/admin/users?page=2&per_page=10')
+    expect(useFetch).toHaveBeenLastCalledWith(
+      '/admin/users?page=2&per_page=10'
+    )
   })
 
   it('disables Previous on the first page and Next on the last page', async () => {
     useFetch.mockReturnValue({
       data: {
-        items: [{ id: 1, name: 'Amina', email: 'amina@example.com', role: 'organizer' }],
+        items: [
+          {
+            id: 1,
+            name: 'Amina',
+            email: 'amina@example.com',
+            role: 'organizer',
+          },
+        ],
         total: 11,
         pages: 2,
         page: 2,
@@ -245,7 +273,14 @@ describe('ManageUsers', () => {
   it('does not show pagination when there is only one page', () => {
     useFetch.mockReturnValue({
       data: {
-        items: [{ id: 1, name: 'Amina', email: 'amina@example.com', role: 'organizer' }],
+        items: [
+          {
+            id: 1,
+            name: 'Amina',
+            email: 'amina@example.com',
+            role: 'organizer',
+          },
+        ],
         total: 1,
         pages: 1,
         page: 1,
@@ -257,7 +292,90 @@ describe('ManageUsers', () => {
 
     render(<ManageUsers />)
 
-    expect(screen.queryByRole('button', { name: 'Previous' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Next' })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Previous' })
+    ).not.toBeInTheDocument()
+
+    expect(
+      screen.queryByRole('button', { name: 'Next' })
+    ).not.toBeInTheDocument()
+  })
+
+  it('sends a recovery email when the admin clicks the button', async () => {
+    useFetch.mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 1,
+            name: 'Amina Hassan',
+            email: 'amina@example.com',
+            role: 'organizer',
+          },
+        ],
+        total: 1,
+        pages: 1,
+        page: 1,
+      },
+      loading: false,
+      error: '',
+      refetch: vi.fn(),
+    })
+
+    api.post.mockResolvedValue({
+      message: "Recovery code sent to the user's registered email.",
+    })
+
+    render(<ManageUsers />)
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Generate Recovery Code',
+      })
+    )
+
+    expect(api.post).toHaveBeenCalledWith(
+      '/admin/users/1/recovery-code'
+    )
+
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      "Recovery code sent to the user's registered email."
+    )
+  })
+
+  it('displays an error when recovery email generation fails', async () => {
+    useFetch.mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 1,
+            name: 'Amina Hassan',
+            email: 'amina@example.com',
+            role: 'organizer',
+          },
+        ],
+        total: 1,
+        pages: 1,
+        page: 1,
+      },
+      loading: false,
+      error: '',
+      refetch: vi.fn(),
+    })
+
+    api.post.mockRejectedValue(
+      new Error('Unable to send recovery email.')
+    )
+
+    render(<ManageUsers />)
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Generate Recovery Code',
+      })
+    )
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Unable to send recovery email.'
+    )
   })
 })

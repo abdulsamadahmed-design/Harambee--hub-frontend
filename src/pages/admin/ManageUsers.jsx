@@ -5,9 +5,11 @@ import ErrorMessage from '../../components/common/ErrorMessage'
 import StatusBadge from '../../components/common/StatusBadge'
 import Button from '../../components/common/Button'
 import useFetch from '../../hooks/useFetch'
+import api from '../../services/api'
 
 export default function ManageUsers() {
   const [page, setPage] = useState(1)
+  const [recoveryStatus, setRecoveryStatus] = useState({})
 
   const { data, loading, error, refetch } = useFetch(
     `/admin/users?page=${page}&per_page=10`
@@ -15,6 +17,42 @@ export default function ManageUsers() {
 
   const users = data?.items || []
   const totalPages = data?.pages || 1
+
+  async function handleGenerateRecoveryCode(userId) {
+    setRecoveryStatus((previous) => ({
+      ...previous,
+      [userId]: {
+        loading: true,
+        message: '',
+        error: '',
+      },
+    }))
+
+    try {
+      const response = await api.post(
+        `/admin/users/${userId}/recovery-code`
+      )
+
+      setRecoveryStatus((previous) => ({
+        ...previous,
+        [userId]: {
+          loading: false,
+          message:
+            response?.message || 'Recovery email sent successfully.',
+          error: '',
+        },
+      }))
+    } catch (err) {
+      setRecoveryStatus((previous) => ({
+        ...previous,
+        [userId]: {
+          loading: false,
+          message: '',
+          error: err.message || 'Unable to send recovery email.',
+        },
+      }))
+    }
+  }
 
   return (
     <DashboardLayout
@@ -53,6 +91,7 @@ export default function ManageUsers() {
                       <th>Phone</th>
                       <th>Role</th>
                       <th>Email Verification</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
 
@@ -60,13 +99,44 @@ export default function ManageUsers() {
                     {users.map((user) => (
                       <tr key={user.id}>
                         <td>{user.name || 'Name unavailable'}</td>
+
                         <td>{user.email}</td>
+
                         <td>{user.phone || '—'}</td>
+
                         <td>
                           <StatusBadge status={user.role} />
                         </td>
+
                         <td>
-                          {user.email_verified ? 'Verified' : 'Not verified'}
+                          {user.email_verified
+                            ? 'Verified'
+                            : 'Not verified'}
+                        </td>
+
+                        <td>
+                          <Button
+                            size="small"
+                            variant="secondary"
+                            loading={recoveryStatus[user.id]?.loading}
+                            onClick={() =>
+                              handleGenerateRecoveryCode(user.id)
+                            }
+                          >
+                            Generate Recovery Code
+                          </Button>
+
+                          {recoveryStatus[user.id]?.message && (
+                            <p role="status">
+                              {recoveryStatus[user.id].message}
+                            </p>
+                          )}
+
+                          {recoveryStatus[user.id]?.error && (
+                            <p role="alert">
+                              {recoveryStatus[user.id].error}
+                            </p>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -80,7 +150,9 @@ export default function ManageUsers() {
                 <Button
                   variant="secondary"
                   disabled={page <= 1}
-                  onClick={() => setPage((currentPage) => currentPage - 1)}
+                  onClick={() =>
+                    setPage((currentPage) => currentPage - 1)
+                  }
                 >
                   Previous
                 </Button>
@@ -92,7 +164,9 @@ export default function ManageUsers() {
                 <Button
                   variant="secondary"
                   disabled={page >= totalPages}
-                  onClick={() => setPage((currentPage) => currentPage + 1)}
+                  onClick={() =>
+                    setPage((currentPage) => currentPage + 1)
+                  }
                 >
                   Next
                 </Button>
