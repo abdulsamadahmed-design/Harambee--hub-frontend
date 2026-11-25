@@ -36,9 +36,10 @@ if (data.items.length === 0) return <EmptyState title="No campaigns yet" />;
 ```
 
 ## Roles
-- organizer: creates and manages campaigns
-- contributor: pledges to campaigns
-- admin: manages users and sees site statistics
+- organizer: creates and manages their own campaigns; also has access to platform-management endpoints in the backend
+- contributor: pledges to campaigns and manages their own pledges
+
+The backend currently has only two roles: `organizer` and `contributor`. Although some frontend pages and API URLs use the name `admin`, there is no separate backend `admin` role. The frontend's admin route currently expects `admin`, so that role integration needs to be aligned before those pages can work end to end.
 
 ## Team workflow
 - Branch from `develop`: `feature/<slice>-<name>`
