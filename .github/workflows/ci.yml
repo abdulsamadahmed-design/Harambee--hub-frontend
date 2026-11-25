@@ -1,4 +1,5 @@
-name: Frontend CI
+
+name: Frontend CI/CD
 
 on:
   push:
@@ -16,7 +17,7 @@ permissions:
 
 jobs:
   frontend-checks:
-    name: Lint and Build
+    name: Frontend Tests and Build
     runs-on: ubuntu-latest
 
     steps:
@@ -36,7 +37,26 @@ jobs:
         run: npm run lint
 
       - name: Run tests
-        run: npm test
+        run: npm test -- --run
 
       - name: Build application
         run: npm run build
+
+  deploy:
+    name: Deploy frontend to Render
+    needs: frontend-checks
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Render deployment
+        env:
+          FRONTEND_DEPLOY_HOOK_URL: ${{ secrets.FRONTEND_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$FRONTEND_DEPLOY_HOOK_URL" ]; then
+            echo "::error::FRONTEND_DEPLOY_HOOK_URL secret is missing."
+            exit 1
+          fi
+
+          curl --fail --silent --show-error \
+            --request POST "$FRONTEND_DEPLOY_HOOK_URL"
