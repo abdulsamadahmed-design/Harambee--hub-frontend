@@ -1,75 +1,100 @@
-import { useEffect, useState } from "react";
 
-import { AuthContext } from "./authContextValue";
+import { useEffect, useState } from 'react'
+
+import { AuthContext } from './authContextValue'
 
 import api, {
   getToken,
   saveToken,
+  saveRefreshToken,
   clearToken,
-} from "../services/api";
+} from '../services/api'
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null)
 
   const [loading, setLoading] = useState(
     () => Boolean(getToken())
-  );
+  )
 
-  // Restore an existing session when the application starts
   useEffect(() => {
-    const token = getToken();
+    let cancelled = false
 
-    if (!token) return;
+    function handleSessionExpired() {
+      setUser(null)
+      setLoading(false)
+    }
 
-    let cancelled = false;
+    window.addEventListener(
+      'auth:session-expired',
+      handleSessionExpired
+    )
 
     async function restoreSession() {
+      const token = getToken()
+
+      if (!token) {
+        setLoading(false)
+        return
+      }
+
       try {
-        const userData = await api.get("/auth/me");
+        const userData = await api.get('/auth/me')
 
         if (!cancelled) {
-          setUser(userData);
+          setUser(userData)
         }
       } catch {
         if (!cancelled) {
-          clearToken();
-          setUser(null);
+          clearToken()
+          setUser(null)
         }
       } finally {
         if (!cancelled) {
-          setLoading(false);
+          setLoading(false)
         }
       }
     }
 
-    restoreSession();
+    restoreSession()
 
     return () => {
-      cancelled = true;
-    };
-  }, []);
+      cancelled = true
 
-  // Login
+      window.removeEventListener(
+        'auth:session-expired',
+        handleSessionExpired
+      )
+    }
+  }, [])
+
   async function login(email, password) {
-    const response = await api.post("/auth/login", {
+    const response = await api.post('/auth/login', {
       email,
       password,
-    });
+    })
 
-    if (!response.token || !response.user) {
-      throw new Error("Invalid authentication response");
+    if (
+      !response.token ||
+      !response.refresh_token ||
+      !response.user
+    ) {
+      throw new Error(
+        'Invalid authentication response from server.'
+      )
     }
 
-    saveToken(response.token);
-    setUser(response.user);
+    saveToken(response.token)
+    saveRefreshToken(response.refresh_token)
 
-    return response.user;
+    setUser(response.user)
+
+    return response.user
   }
 
-  // Logout
   function logout() {
-    clearToken();
-    setUser(null);
+    clearToken()
+    setUser(null)
   }
 
   const value = {
@@ -78,11 +103,11 @@ export function AuthProvider({ children }) {
     login,
     logout,
     isAuthenticated: Boolean(user),
-  };
+  }
 
   return (
     <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
-  );
+  )
 }
