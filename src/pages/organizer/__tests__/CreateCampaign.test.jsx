@@ -153,16 +153,74 @@ describe('CreateCampaign', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create Campaign' }))
 
     await waitFor(() => {
-      expect(api.post).toHaveBeenCalledWith('/campaigns/', {
-        title: 'School Fees Campaign',
-        description: 'Help students pay their school fees.',
-        goal_amount: '5000.00',
-        end_date: null,
-      })
-    })
+  expect(api.post).toHaveBeenCalledTimes(1)
 
+
+
+ expect(api.post).toHaveBeenCalledWith('/campaigns/', {
+  title: 'School Fees Campaign',
+  description: 'Help students pay their school fees.',
+  goal_amount: '5000.00',
+  end_date: null,
+})
+
+  expect(mockNavigate).toHaveBeenCalledWith('/organizer/campaigns')
+})
     expect(mockNavigate).toHaveBeenCalledWith('/organizer/campaigns')
   })
+  it('submits campaign data and image using FormData', async () => {
+  api.post.mockResolvedValue({ message: 'Created' })
+
+  renderPage()
+
+  fireEvent.change(screen.getByLabelText('Campaign Title'), {
+    target: { value: 'School Fees Campaign' },
+  })
+
+  fireEvent.change(screen.getByLabelText('Description'), {
+    target: { value: 'Help students pay their school fees.' },
+  })
+
+  fireEvent.change(screen.getByLabelText('Fundraising Goal (KSh)'), {
+    target: { value: '5000' },
+  })
+
+  const image = new File(
+    ['sample image content'],
+    'campaign.png',
+    { type: 'image/png' }
+  )
+
+  fireEvent.change(
+    screen.getByLabelText('Campaign Image (optional)'),
+    { target: { files: [image] } }
+  )
+
+  expect(
+    await screen.findByText(/Image ready:/)
+  ).toBeInTheDocument()
+
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Create Campaign' })
+  )
+
+  await waitFor(() => {
+    expect(api.post).toHaveBeenCalledTimes(1)
+
+    const [endpoint, payload] = api.post.mock.calls[0]
+
+    expect(endpoint).toBe('/campaigns/')
+    expect(payload).toBeInstanceOf(FormData)
+    expect(payload.get('title')).toBe('School Fees Campaign')
+    expect(payload.get('description')).toBe(
+      'Help students pay their school fees.'
+    )
+    expect(payload.get('goal_amount')).toBe('5000.00')
+    expect(payload.get('image').name).toBe('campaign.png')
+  })
+
+  expect(mockNavigate).toHaveBeenCalledWith('/organizer/campaigns')
+})
 
   it('displays an error when campaign creation fails', async () => {
     api.post.mockRejectedValue(new Error('Server error'))
